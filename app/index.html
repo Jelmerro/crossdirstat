@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="../node_modules/materialize-css/dist/css/materialize.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <title>crossdirstat</title>
+</head>
+<body>
+    <nav>
+        <span id="title">crossdirstat</span>
+        <span class="menu-item selected" id="menu-start" onclick="TABS.switchToTab('start')">Start</span>
+        <span class="menu-item" id="menu-directories" onclick="TABS.switchToTab('directories')">Directories</span>
+        <span class="menu-item" id="menu-visual" onclick="TABS.switchToTab('visual')">Visual</span>
+        <button class="btn white-text red close-button" onclick="remote.getCurrentWindow().close()">X</button>
+    </nav>
+    <div class="container-fluid">
+        <div id="progress" style="display: none">
+            <div class="fancy-center">
+                <img src="img/crossdirstat.png" id="spinner">
+                <div style="display: flex;margin-bottom: 0;">
+                    <span class="progress-label">Scan</span>
+                    <span class="progress-label">Directory tree</span>
+                    <span class="progress-label">Squarify</span>
+                    <span class="progress-label">Generate canvas</span>
+                </div>
+                <div style="display: flex;">
+                    <span class="progress">
+                        <div class="determinate accent-3 grey lighten-3" id="progress-scan"></div>
+                    </span>
+                    <span class="progress">
+                        <div class="determinate accent-3 grey lighten-3" id="progress-tree"></div>
+                    </span>
+                    <span class="progress">
+                        <div class="determinate accent-3 grey lighten-3" id="progress-squarify"></div>
+                    </span>
+                    <span class="progress">
+                        <div class="determinate accent-3 grey lighten-3" id="progress-canvas"></div>
+                    </span>
+                </div>
+                <div id="progress-text"></div>
+            </div>
+        </div>
+        <div id="start">
+            <div class="row" id="welcome">
+                <img src="img/crossdirstat.png">
+                <span>Welcome to crossdirstat</span>
+            </div>
+            <div class="row">
+                <div id="custom-folder">
+                    <h4>Scan a custom folder</h4>
+                    <input id="folder-path" type="text" placeholder="Folder location" oninput="MAIN.updateStartButton()"></input>
+                    <button id="start-button" class="btn" onclick="MAIN.go(document.getElementById('folder-path').value)" disabled>Scan folder</button>
+                    <button class="btn" onclick="MAIN.pickFolder()">Browse</button>
+                </div>
+                <div id="pre-configured-folders">
+                    <h4>Scan an entire disk</h4>
+                </div>
+            </div>
+            <div class="row">
+                crossdirstat is an easy directory statistics program,
+                which is available for a wide range of operating systems.
+                It is created by <span class="link" onclick="shell.openExternal('https://github.com/jelmerro')">Jelmer van Arnhem</span>.
+                and can be copied under the terms of the MIT license.
+                The source code can be found on <span class="link" onclick="shell.openExternal('https://github.com/jelmerro/crossdirstat')">github</span>.
+            </div>
+            <div class="row">
+                <div id="read-errors"></div>
+            </div>
+        </div>
+        <div id="directories" style="display: none;">
+            <span class="fancy-center">
+                Select a directory from the start tab first
+            </span>
+        </div>
+        <div id="visual" style="display: none;">
+            <div style="display: flex;">
+                <button class="btn" onclick="VISUAL.saveImage()" disabled>Export/Save</button>
+                <span class="truncate" id="file-name">Select a directory from the start tab first</span>
+                <button class="btn" id="visual-toggle-button" onclick="SETTINGS.toggleVisualConfig()" disabled>Show colors</button>
+            </div>
+            <div style="display: flex;">
+                <canvas id="square-view" width="10000px" height="10000px" onmousemove="VISUAL.setFilenameOnHover(event)">
+                </canvas>
+                <div id="colors-config" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    <script>if (typeof module === "object") {window.module = module; module = undefined;}</script>
+    <script src="../node_modules/materialize-css/dist/js/materialize.js"></script>
+    <script>
+        const { remote, shell } = require("electron")
+        const exec = require("child_process").execSync
+        const fs = require("fs")
+        const path = require("path")
+        const squarify = require("squarify")
+        const MAIN = require("./js/main.js")
+        const TABS = require("./js/tabs.js")
+        const DIR = require("./js/treeviewer.js")
+        const VISUAL = require("./js/visual.js")
+        const SETTINGS = require("./js/settings.js")
+        if (window.module) module = window.module;
+        MAIN.populateDisks()
+    </script>
+</body>
+</html>
