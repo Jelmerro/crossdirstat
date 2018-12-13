@@ -1,0 +1,122 @@
+{
+  "name": "crossdirstat",
+  "version": "0.1.0",
+  "description": "Free open-source cross-platform file & directory statistics",
+  "main": "app/index.js",
+  "build": {
+    "appId": "com.github.jelmerro.crossdirstat",
+    "linux": {
+      "executableName": "crossdirstat",
+      "icon": "build/icons",
+      "category": "Office;Utility;",
+      "maintainer": "Jelmer van Arnhem",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "freebsd",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "tar.gz",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "mac": {
+      "icon": "build/icons",
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "extraFiles": [
+        {
+          "from": "README.md",
+          "to": "../../README.md"
+        },
+        {
+          "from": "LICENSE",
+          "to": "../../LICENSE"
+        }
+      ]
+    },
+    "win": {
+      "icon": "build/icons",
+      "legalTrademarks": "Copyright @ Jelmer van Arnhem | Licensed as free software (MIT)",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "license": "LICENSE"
+    },
+    "copyright": "Copyright @ Jelmer van Arnhem | Licensed as free software (MIT)",
+    "extraFiles": [
+      "README.md",
+      "LICENSE"
+    ]
+  },
+  "scripts": {
+    "start": "electron app",
+    "buildall": "electron-builder --linux --mac --win",
+    "buildlinux": "electron-builder --linux",
+    "buildmac": "electron-builder --mac",
+    "buildwin": "electron-builder --win"
+  },
+  "repository": "https://github.com/jelmerro/crossdirstat",
+  "homepage": "https://github.com/jelmerro/crossdirstat",
+  "keywords": [
+    "Electron",
+    "Bootstrap",
+    "Directory",
+    "Statistics"
+  ],
+  "author": "Jelmer van Arnhem",
+  "email": "Jelmerro@users.noreply.github.com",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^3.0.11",
+    "electron-builder": "^20.38.3",
+    "eslint": "^5.10.0"
+  },
+  "dependencies": {
+    "materialize-css": "^1.0.0",
+    "squarify": "^1.0.1"
+  }
+}
