@@ -11,8 +11,9 @@ function currentTab() {
 }
 
 function switchToTab(newTab, force=false) {
-    if ((tabs.indexOf(newTab) === -1 || currentTab() === "progress")
-        && !force) {
+    const tabDoesNotExist = tabs.indexOf(newTab) === -1
+    const inProgress = currentTab() === "progress"
+    if (tabDoesNotExist || (inProgress && !force)) {
         return
     }
     for (const tab of tabs) {

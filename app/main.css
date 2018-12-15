@@ -1,13 +1,15 @@
 /* general */
 html, body {width: 100vw;height: 100vh;}
 body {font-size: 13px !important;overflow: hidden;}
+main {padding: 1em;}
 /* navigation */
-nav {height: 4.5em !important;background-color: lightgrey;}
+nav {height: 4.5em !important;background-color: #aaa;}
 #title {position: absolute;text-align: center;font-size: 2.5em;-webkit-app-region: drag;right: 2px;top: 2px;left: 2px;}
 .menu-item {font-size: 1.2em;display: inline-block;-webkit-app-region: no-drag;cursor: pointer;position: relative;z-index: 10;padding: 0 1em;}
 .selected {color: black;background-color: white;}
 .close-button {height: 3em;font-weight: bold;-webkit-app-region: no-drag;position: absolute;right: 0.5em;top: 0.5em;}
 /* progress */
+#progress {display: flex;justify-content: center;align-items: center;flex-direction: column;}
 #progress .progress {width: 20vw;height: 1em;background-color: #eee;}
 #progress .progress > div {transition: none !important;}
 #progress .progress-label {width: 20vw;text-align: center;}
@@ -21,28 +23,28 @@ nav {height: 4.5em !important;background-color: lightgrey;}
 #folder-path::selection {background-color: #fc0;color: #333;}
 #folder-path:focus {border-bottom: 1px solid #fc0;box-shadow: 0 2px 0 0 #fc0;}
 #custom-folder button, #pre-configured-folders button {margin: 1em 1em 0em 0em;flex: 1;}
-.link {color: #aaf;}
+.link {color: #fa0;}
 .link:hover {text-decoration: underline;cursor: pointer;}
 #start > div:last-child {overflow-y: auto;}
+#read-errors {user-select: text;}
+#read-errors::selection {background-color: #ddd;}
 /* directories */
 .collapsible-header {display: flex;flex-wrap: wrap;padding: 0.5em;}
 .collapsible-body {padding: 0.5em;}
 .collection-item {display: flex;flex-wrap: wrap;border-bottom: 1px solid #ddd;padding: 0.5em;}
 #directory-title {line-height: 100%;font-size: 1.7em;padding: 0.5em 0.5em 0.5em 0;flex: 1;}
 #directories .row {margin-bottom: 0;}
-#directories .progress {margin: 0.5em 0 0.5em 0;background-color: #eee;}
+#directories .progress {margin: 0.5em 0 0.5em 0;background-color: #eee;outline: 2px solid white;}
 #directories > ul {overflow-y: auto;max-height: calc(100vh - 13em);margin: 1em 0;}
+#directories button {width: 12em;min-width: 12em;}
 /* visual */
 #visual {height: calc(100vh - 6em);max-width: calc(100vw - 2em);display: flex;flex-direction: column;}
 #square-view {flex: 1;padding: 0;position: relative;margin-top: 1em;height: calc(100vh - 10em);max-width: 100%;min-width: 0;}
 #file-name {font-size: 0.8em;margin: auto;padding: 1em;}
-#visual button {width: 10em;min-width: 10em;}
+#visual button {width: 12em;min-width: 12em;}
 #colors-config {margin: 1em 0 0 1em;max-height: calc(100vh - 10em);overflow-y: auto;}
 /* misc */
-.container-fluid {padding: 1em;}
 .btn {background-color: #fc0;color: #333;}
 .btn:active, .btn:focus {background-color: #fb0;}
 .btn:hover {background-color: #fd0;}
-.fancy-center {display: flex;justify-content: center;align-items: center;flex-direction: column;}
-.fancy-center > * {margin-bottom: 2em;}
-* {-webkit-user-select: none;}
+* {user-select: none;}

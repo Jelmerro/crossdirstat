@@ -113,6 +113,9 @@ function fillTree(allFiles, elementId) {
             treeContents += fileInTree(f, elementId, allFiles.size)
         }
     }
+    if (allFiles.children.length === 0) {
+        treeContents += "This directory is completely empty"
+    }
     tree.innerHTML = treeContents + "</ul>"
     M.Collapsible.init(document.querySelectorAll(".collapsible"))
 }
@@ -121,10 +124,7 @@ function compareSizes(a, b) {
     if (a.size < b.size) {
         return -1
     }
-    if (a.size > b.size) {
-        return 1
-    }
-    return 0
+    return 1
 }
 
 function dirInTree(f, parent, dirSize) {
@@ -150,8 +150,7 @@ function dirInTree(f, parent, dirSize) {
             }
         }
         contents += "</ul></div></div></div></li>"
-    }
-    if (f.children.length === 0) {
+    } else {
         contents += `<div class="collapsible-body">
             This directory is completely empty</div></li>`
     }

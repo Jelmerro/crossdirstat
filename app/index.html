@@ -15,32 +15,30 @@
         <span class="menu-item" id="menu-visual" onclick="TABS.switchToTab('visual')">Visual</span>
         <button class="btn white-text red close-button" onclick="remote.getCurrentWindow().close()">X</button>
     </nav>
-    <div class="container-fluid">
+    <main class="container-fluid">
         <div id="progress" style="display: none">
-            <div class="fancy-center">
-                <img src="img/crossdirstat.png" id="spinner">
-                <div style="display: flex;margin-bottom: 0;">
-                    <span class="progress-label">Scan</span>
-                    <span class="progress-label">Directory tree</span>
-                    <span class="progress-label">Squarify</span>
-                    <span class="progress-label">Generate canvas</span>
-                </div>
-                <div style="display: flex;">
-                    <span class="progress">
-                        <div class="determinate accent-3 grey lighten-3" id="progress-scan"></div>
-                    </span>
-                    <span class="progress">
-                        <div class="determinate accent-3 grey lighten-3" id="progress-tree"></div>
-                    </span>
-                    <span class="progress">
-                        <div class="determinate accent-3 grey lighten-3" id="progress-squarify"></div>
-                    </span>
-                    <span class="progress">
-                        <div class="determinate accent-3 grey lighten-3" id="progress-canvas"></div>
-                    </span>
-                </div>
-                <div id="progress-text"></div>
+            <img src="img/crossdirstat.png" id="spinner">
+            <div style="display: flex;margin-bottom: 0;">
+                <span class="progress-label">Scan</span>
+                <span class="progress-label">Directory tree</span>
+                <span class="progress-label">Squarify</span>
+                <span class="progress-label">Generate canvas</span>
             </div>
+            <div style="display: flex;">
+                <span class="progress">
+                    <div class="determinate accent-3 grey lighten-3" id="progress-scan"></div>
+                </span>
+                <span class="progress">
+                    <div class="determinate accent-3 grey lighten-3" id="progress-tree"></div>
+                </span>
+                <span class="progress">
+                    <div class="determinate accent-3 grey lighten-3" id="progress-squarify"></div>
+                </span>
+                <span class="progress">
+                    <div class="determinate accent-3 grey lighten-3" id="progress-canvas"></div>
+                </span>
+            </div>
+            <div id="progress-text"></div>
         </div>
         <div id="start">
             <div class="row" id="welcome">
@@ -64,13 +62,14 @@
                 It is created by <span class="link" onclick="shell.openExternal('https://github.com/jelmerro')">Jelmer van Arnhem</span>.
                 and can be copied under the terms of the MIT license.
                 The source code can be found on <span class="link" onclick="shell.openExternal('https://github.com/jelmerro/crossdirstat')">github</span>.
+                Version 0.2.0 is currently running, see the <span class="link" onclick="shell.openExternal('https://github.com/jelmerro/crossdirstat/releases')">release page</span> for new versions.
             </div>
             <div class="row">
                 <div id="read-errors"></div>
             </div>
         </div>
         <div id="directories" style="display: none;">
-            <span class="fancy-center">
+            <span style="text-align: center;display: block;">
                 Select a directory from the start tab first
             </span>
         </div>
@@ -86,7 +85,7 @@
                 <div id="colors-config" style="display: none;"></div>
             </div>
         </div>
-    </div>
+    </main>
     <script>if (typeof module === "object") {window.module = module; module = undefined;}</script>
     <script src="../node_modules/materialize-css/dist/js/materialize.js"></script>
     <script>
