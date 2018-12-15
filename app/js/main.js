@@ -66,7 +66,7 @@ function handleErrors() {
         readErrorsText += `${error}<br />`
     }
     document.getElementById("read-errors").innerHTML = readErrorsText
-    document.getElementById("read-errors").style.color = "#c50"
+    document.getElementById("read-errors").style.color = "#f50"
     TABS.switchToTab("start", true)
 }
 

@@ -163,9 +163,6 @@ function processNode(node) {
 function filetype(f) {
     let type = /^.+\.([^.]+)$/.exec(f.name)
     type = type === null ? "none" : type[1]
-    if (type === null) {
-        type = "none"
-    }
     if (filetypes[type] === undefined) {
         filetypes[type] = {}
         filetypes[type].size = f.size
