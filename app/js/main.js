@@ -59,9 +59,14 @@ function handleErrors() {
         TABS.switchToTab("start", true)
         return
     }
-    let readErrorsText = "There were a total of "
-    readErrorsText += readErrors.length
-    readErrorsText += " read error(s):<br /><br />"
+    let readErrorsText = ""
+    if (readErrors.length === 1) {
+        readErrorsText = "There was a single read error:<br /><br />"
+    } else {
+        readErrorsText = "There were a total of "
+        readErrorsText += readErrors.length
+        readErrorsText += " read errors:<br /><br />"
+    }
     for (const error of readErrors) {
         readErrorsText += `${error}<br />`
     }
@@ -179,14 +184,18 @@ function populateDisks() {
     //Add disks as an option to the start tab
     const diskElement = document.getElementById("pre-configured-folders")
     for (const disk of disks) {
-        const escapedDiskLocation = disk
-            .replace(/\\/g, "\\\\").replace(/'/g, "\\'")
-        diskElement.innerHTML += `<button class="btn"
-            onclick="MAIN.go('${escapedDiskLocation}')">${disk}</button>`
+        const button = document.createElement("button")
+        button.innerHTML = disk
+        button.className = "btn"
+        button.onclick = () => {go(disk)}
+        diskElement.appendChild(button)
     }
     //Add the all disk option
-    diskElement.innerHTML += `<button class="btn"
-        onclick="MAIN.goAllDisks()">All Disks</button>`
+    const allButton = document.createElement("button")
+    allButton.textContent = "All disks"
+    allButton.className = "btn"
+    allButton.onclick = () => {goAllDisks()}
+    diskElement.appendChild(allButton)
     allDisks = disks
 }
 
@@ -241,14 +250,13 @@ function processDisk(disk) {
 }
 
 function saveTree() {
-    let filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
-        title: "Select the save location"
+    const filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+        title: "Select the save location",
+        filters: [
+            {name: "JavaScript Object Notation file", extensions: ["json"]}]
     })
     if (filename === undefined) {
         return
-    }
-    if (!filename.endsWith(".json")) {
-        filename += ".json"
     }
     const json = {
         files: allFiles,
@@ -281,7 +289,6 @@ function writeToFile(location, contents, encoding="utf8") {
 module.exports = {
     go,
     populateDisks,
-    goAllDisks,
     pickFolder,
     handleErrors,
     updateCurrentStep,

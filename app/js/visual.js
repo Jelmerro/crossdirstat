@@ -131,8 +131,8 @@ function colorChange(event) {
 
 function getFiletypesBySize() {
     return Object.keys(filetypes).sort((one, two) => {
-        return filetypes[one].size - filetypes[two].size
-    }).reverse()
+        return filetypes[two].size - filetypes[one].size
+    })
 }
 
 function setFilenameOnHover(e) {
@@ -184,33 +184,28 @@ function saveImage() {
         buttons: ["SVG", "PNG", "JSON", "Cancel"],
         message: message
     })
-    if (response === 3) {
-        return
-    }
-    const filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
-        title: "Select the save location"
-    })
-    if (filename === undefined) {
-        return
-    }
     if (response === 0) {
-        saveSVG(filename)
+        saveSVG()
     } else if (response === 1) {
-        savePNG(filename)
+        savePNG()
     } else if (response === 2) {
-        saveJSON(filename)
+        saveJSON()
     }
 }
 
-function saveSVG(filename) {
-    if (!filename.endsWith(".svg")) {
-        filename += ".svg"
+function saveSVG() {
+    const filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+        title: "Select the save location",
+        filters: [{name: "Scalable Vector Graphics file", extensions: ["svg"]}]
+    })
+    if (filename === undefined) {
+        return
     }
     let body = `<?xml version="1.0" encoding="UTF-8" ?>\n`
     body += `<!-- Generated with crossdirstat: `
     body += `Free open-source cross-platform file & directory statistics -->\n`
     body += `<!-- For more details see `
-    body += `https://github.com/jelmerro/crossdirstat --><svg height="1000" `
+    body += `https://github.com/jelmerro/crossdirstat -->\n<svg height="1000" `
     body += `width="1000" xmlns="http://www.w3.org/2000/svg" version="1.1">\n`
     const allColors = SETTINGS.getSelectedColors()
     const types = getFiletypesBySize()
@@ -228,18 +223,27 @@ function saveSVG(filename) {
     MAIN.writeToFile(filename, body)
 }
 
-function savePNG(filename) {
-    if (!filename.endsWith(".png")) {
-        filename += ".png"
+function savePNG() {
+    const filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+        title: "Select the save location",
+        filters: [{name: "Portable Network Graphics file", extensions: ["png"]}]
+    })
+    if (filename === undefined) {
+        return
     }
     const canvas = document.getElementById("square-view")
     const imageData = canvas.toDataURL().replace(/^data:image\/png;base64,/, "")
     MAIN.writeToFile(filename, imageData, "base64")
 }
 
-function saveJSON(filename) {
-    if (!filename.endsWith(".json")) {
-        filename += ".json"
+function saveJSON() {
+    const filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+        title: "Select the save location",
+        filters: [
+            {name: "JavaScript Object Notation file", extensions: ["json"]}]
+    })
+    if (filename === undefined) {
+        return
     }
     const json = {
         squares: squares,
