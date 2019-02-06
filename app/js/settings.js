@@ -31,7 +31,7 @@ function getUnixVolumes() {
         return disks
     }
     try {
-        const output = exec(`df -lkP | grep ^/`).toString()
+        const output = exec("df -lkP | grep ^/").toString()
         const lines = output.split("\n")
         for (const line of lines) {
             const disk = line.split(" ").pop()
