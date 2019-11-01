@@ -16,7 +16,7 @@
         <button class="btn white-text red close-button" onclick="remote.getCurrentWindow().close()">X</button>
     </nav>
     <main class="container-fluid">
-        <div id="progress" style="display: none">
+        <div id="progress" style="display: none;">
             <img src="icons/1024x1024.png" id="spinner">
             <div style="display: flex;margin-bottom: 0;">
                 <span class="progress-label">Scan</span>
@@ -62,7 +62,7 @@
                 It is created by <span class="link" onclick="shell.openExternal('https://github.com/jelmerro')">Jelmer van Arnhem</span>
                 and can be copied under the terms of the MIT license.
                 The source code can be found on <span class="link" onclick="shell.openExternal('https://github.com/jelmerro/crossdirstat')">github</span>.
-                Version 1.0.0 is currently running, see the <span class="link" onclick="shell.openExternal('https://github.com/jelmerro/crossdirstat/releases')">release page</span> for new versions.
+                Version <span id="version"></span> is currently running, see the <span class="link" onclick="shell.openExternal('https://github.com/jelmerro/crossdirstat/releases')">release page</span> for new versions.
             </div>
             <div class="row">
                 <div id="read-errors"></div>
@@ -86,7 +86,7 @@
             </div>
         </div>
     </main>
-    <script>if (typeof module === "object") {window.module = module; module = undefined;}</script>
+    <script>if (typeof module === "object") {window.module = module; module = undefined}</script>
     <script src="../node_modules/materialize-css/dist/js/materialize.js"></script>
     <script>
         const { remote, shell } = require("electron")
@@ -99,7 +99,9 @@
         const DIR = require("./js/treeviewer.js")
         const VISUAL = require("./js/visual.js")
         const SETTINGS = require("./js/settings.js")
-        if (window.module) module = window.module;
+        const version = process.env.npm_package_version || remote.app.getVersion()
+        document.getElementById("version").textContent = version
+        if (window.module) module = window.module
         MAIN.populateDisks()
     </script>
 </body>
