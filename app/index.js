@@ -10,8 +10,12 @@ app.on("ready", () => {
     mainWindow = new BrowserWindow({
         width: Math.floor(width / 1.5),
         height: Math.floor(height / 1.33),
-        icon: path.join(__dirname, "img/crossdirstat.png"),
-        frame: false
+        icon: path.join(__dirname, "icons/1024x1024.png"),
+        frame: false,
+        webPreferences: {
+            plugins: true,
+            nodeIntegration: true
+        }
     })
     mainWindow.setMinimumSize(750, 750)
     mainWindow.loadURL(url.format({

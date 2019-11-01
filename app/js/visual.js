@@ -178,7 +178,7 @@ function saveImage() {
     let message = "SVG: Vector with filenames as tooltip hover\n"
     message += "PNG: 10000x10000 lossless image render (multiple seconds)\n"
     message += "JSON: List of squares, colors and filetype statistics"
-    const response = remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+    const response = remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
         type: "question",
         title: "Export type",
         buttons: ["SVG", "PNG", "JSON", "Cancel"],
@@ -194,7 +194,7 @@ function saveImage() {
 }
 
 function saveSVG() {
-    const filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+    const filename = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), {
         title: "Select the save location",
         filters: [{name: "Scalable Vector Graphics file", extensions: ["svg"]}]
     })
@@ -224,7 +224,7 @@ function saveSVG() {
 }
 
 function savePNG() {
-    const filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+    const filename = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), {
         title: "Select the save location",
         filters: [{name: "Portable Network Graphics file", extensions: ["png"]}]
     })
@@ -237,7 +237,7 @@ function savePNG() {
 }
 
 function saveJSON() {
-    const filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+    const filename = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), {
         title: "Select the save location",
         filters: [
             {name: "JavaScript Object Notation file", extensions: ["json"]}]

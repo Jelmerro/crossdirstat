@@ -7,7 +7,7 @@ let folderCounter = 0
 let fileCounter = 0
 
 function pickFolder() {
-    const folders = remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+    const folders = remote.dialog.showOpenDialogSync(remote.getCurrentWindow(), {
         title: "Select a folder",
         properties: ["openDirectory"]
     })
@@ -250,7 +250,7 @@ function processDisk(disk) {
 }
 
 function saveTree() {
-    const filename = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+    const filename = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), {
         title: "Select the save location",
         filters: [
             {name: "JavaScript Object Notation file", extensions: ["json"]}]
@@ -268,14 +268,14 @@ function saveTree() {
 function writeToFile(location, contents, encoding="utf8") {
     fs.writeFile(location, contents, encoding, err => {
         if (err === null) {
-            remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+            remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
                 title: "Success",
                 type: "info",
                 buttons: ["Ok"],
                 message: "File saved successfully"
             })
         } else {
-            remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+            remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
                 title: "Error",
                 type: "error",
                 buttons: ["Ok"],
