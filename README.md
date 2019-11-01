@@ -1,7 +1,7 @@
 crossdirstat
 ============
 
-![crossdirstat](build/icons/128x128.png)
+![crossdirstat](app/icons/128x128.png)
 
 Free open-source cross-platform file & directory statistics as found on [Github](https://github.com/jelmerro/crossdirstat)
 
