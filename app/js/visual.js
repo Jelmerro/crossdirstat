@@ -5,7 +5,7 @@ let filetypes = {}
 let callbacks = 0
 let squares = []
 
-function generate() {
+const generate = () => {
     filetypes = {}
     callbacks = 0
     document.getElementById("file-name").textContent = ""
@@ -26,14 +26,15 @@ function generate() {
     MAIN.updateCurrentStep("squarify", 0, processedFiles.subfiles)
     setTimeout(() => {
         squares = squarify.default(processedFiles.children, {
-            x0: 0, y0: 0, x1: 10000, y1: 10000})
+            "x0": 0, "y0": 0, "x1": 10000, "y1": 10000
+        })
         setTimeout(() => {
             parseSquares()
         }, 30)
     }, 30)
 }
 
-function parseSquares() {
+const parseSquares = () => {
     const allColors = SETTINGS.getSelectedColors()
     const typesBySize = getFiletypesBySize()
     const canvas = document.getElementById("square-view")
@@ -62,20 +63,20 @@ function parseSquares() {
     generateStatsAndColors()
 }
 
-function changeColor(color, change) {
+const changeColor = (color, change) => {
     const red = changeHex(color.substring(1, 3), change)
     const green = changeHex(color.substring(3, 5), change)
     const blue = changeHex(color.substring(5, 7), change)
     return `#${red}${green}${blue}`
 }
 
-function changeHex(hex, change) {
+const changeHex = (hex, change) => {
     const calculated = parseInt(hex, 16) + change
     const newHex = Math.min(255, Math.max(0, calculated))
     return newHex.toString(16).padStart(2, "0")
 }
 
-function doneStroking() {
+const doneStroking = () => {
     callbacks += 1
     MAIN.updateCurrentStep("canvas", callbacks, squares.length)
     if (callbacks === squares.length) {
@@ -86,7 +87,7 @@ function doneStroking() {
     }
 }
 
-function generateStatsAndColors() {
+const generateStatsAndColors = () => {
     const allColors = SETTINGS.getSelectedColors()
     const colorsElement = document.getElementById("colors-config")
     colorsElement.innerHTML = ""
@@ -106,7 +107,7 @@ function generateStatsAndColors() {
     }
 }
 
-function colorChange(event) {
+const colorChange = event => {
     const index = event.srcElement.getAttribute("index")
     const color = event.srcElement.value
     const canvas = document.getElementById("square-view")
@@ -129,13 +130,13 @@ function colorChange(event) {
     }
 }
 
-function getFiletypesBySize() {
+const getFiletypesBySize = () => {
     return Object.keys(filetypes).sort((one, two) => {
         return filetypes[two].size - filetypes[one].size
     })
 }
 
-function setFilenameOnHover(e) {
+const setFilenameOnHover = e => {
     const canvas = document.getElementById("square-view")
     const r = canvas.getBoundingClientRect()
     const x = (e.clientX - r.left) / (r.right - r.left) * canvas.width
@@ -148,7 +149,7 @@ function setFilenameOnHover(e) {
     }
 }
 
-function processNode(node) {
+const processNode = node => {
     node.value = node.size
     if (node.children === undefined) {
         node.type = filetype(node)
@@ -160,9 +161,13 @@ function processNode(node) {
     return node
 }
 
-function filetype(f) {
+const filetype = f => {
     let type = /^.+\.([^.]+)$/.exec(f.name)
-    type = type === null ? "none" : type[1]
+    if (type) {
+        type = type[1]
+    } else {
+        type = "none"
+    }
     if (filetypes[type] === undefined) {
         filetypes[type] = {}
         filetypes[type].size = f.size
@@ -174,16 +179,17 @@ function filetype(f) {
     return type
 }
 
-function saveImage() {
+const saveImage = () => {
     let message = "SVG: Vector with filenames as tooltip hover\n"
     message += "PNG: 10000x10000 lossless image render (multiple seconds)\n"
     message += "JSON: List of squares, colors and filetype statistics"
-    const response = remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
-        type: "question",
-        title: "Export type",
-        buttons: ["SVG", "PNG", "JSON", "Cancel"],
-        message: message
-    })
+    const response = remote.dialog.showMessageBoxSync(
+        remote.getCurrentWindow(), {
+            "type": "question",
+            "title": "Export type",
+            "buttons": ["SVG", "PNG", "JSON", "Cancel"],
+            "message": message
+        })
     if (response === 0) {
         saveSVG()
     } else if (response === 1) {
@@ -193,11 +199,15 @@ function saveImage() {
     }
 }
 
-function saveSVG() {
-    const filename = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), {
-        title: "Select the save location",
-        filters: [{name: "Scalable Vector Graphics file", extensions: ["svg"]}]
-    })
+const saveSVG = () => {
+    const filename = remote.dialog.showSaveDialogSync(
+        remote.getCurrentWindow(), {
+            "title": "Select the save location",
+            "filters": [{
+                "name": "Scalable Vector Graphics file",
+                "extensions": ["svg"]
+            }]
+        })
     if (filename === undefined) {
         return
     }
@@ -223,11 +233,15 @@ function saveSVG() {
     MAIN.writeToFile(filename, body)
 }
 
-function savePNG() {
-    const filename = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), {
-        title: "Select the save location",
-        filters: [{name: "Portable Network Graphics file", extensions: ["png"]}]
-    })
+const savePNG = () => {
+    const filename = remote.dialog.showSaveDialogSync(
+        remote.getCurrentWindow(), {
+            "title": "Select the save location",
+            "filters": [{
+                "name": "Portable Network Graphics file",
+                "extensions": ["png"]
+            }]
+        })
     if (filename === undefined) {
         return
     }
@@ -236,19 +250,22 @@ function savePNG() {
     MAIN.writeToFile(filename, imageData, "base64")
 }
 
-function saveJSON() {
-    const filename = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), {
-        title: "Select the save location",
-        filters: [
-            {name: "JavaScript Object Notation file", extensions: ["json"]}]
-    })
+const saveJSON = () => {
+    const filename = remote.dialog.showSaveDialogSync(
+        remote.getCurrentWindow(), {
+            "title": "Select the save location",
+            "filters": [{
+                "name": "JavaScript Object Notation file",
+                "extensions": ["json"]
+            }]
+        })
     if (filename === undefined) {
         return
     }
     const json = {
-        squares: squares,
-        colors: SETTINGS.getSelectedColors(),
-        filetypes: getFiletypesBySize()
+        "squares": squares,
+        "colors": SETTINGS.getSelectedColors(),
+        "filetypes": getFiletypesBySize()
     }
     MAIN.writeToFile(filename, JSON.stringify(json, null, 4))
 }

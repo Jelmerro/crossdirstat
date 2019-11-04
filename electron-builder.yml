@@ -38,7 +38,7 @@ mac:
     - from: LICENSE
       to: ../../LICENSE
 win:
-  icon: app/img/icons/512x512.png
+  icon: app/icons/512x512.png
   legalTrademarks: Copyright @ Jelmer van Arnhem | Licensed as free software (MIT)
   target:
     - target: nsis
@@ -50,13 +50,6 @@ win:
 nsis:
   oneClick: false
   license: LICENSE
-fileAssociations:
-  - ext: html
-protocols:
-  - name: Websites
-    schemes:
-      - http
-      - https
 copyright: Copyright @ Jelmer van Arnhem | Licensed as free software (MIT)
 extraFiles:
   - filter:

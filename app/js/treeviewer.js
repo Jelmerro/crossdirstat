@@ -3,58 +3,61 @@
 
 let readErrors = []
 
-function File(location, size) {
-    MAIN.updateCounter("File", location)
-    this.location = location
-    this.size = size
-    this.name = path.basename(this.location)
-    this.dir = path.dirname(this.location)
+const File = class {
+    constructor(location, size) {
+        MAIN.updateCounter("File", location)
+        this.location = location
+        this.size = size
+        this.name = path.basename(this.location)
+        this.dir = path.dirname(this.location)
+    }
 }
 
-function Dir(location) {
-    MAIN.updateCounter("Dir", location)
-    this.location = location
-    this.size = 0
-    this.name = path.basename(this.location) || this.location
-    this.dir = path.dirname(this.location)
-    this.children = []
-    this.subfiles = 0
-    this.subfolders = 0
-
-    this.add = function add(file) {
+const Dir = class {
+    constructor(location) {
+        MAIN.updateCounter("Dir", location)
+        this.location = location
+        this.size = 0
+        this.name = path.basename(this.location) || this.location
+        this.dir = path.dirname(this.location)
+        this.children = []
+        this.subfiles = 0
+        this.subfolders = 0
+    }
+    add(file) {
         this.children.push(file)
         this.size += file.size
-        if (!isDir(file)) {
-            this.subfiles += 1
-        } else {
+        if (isDir(file)) {
             this.subfiles += file.subfiles
             this.subfolders += file.subfolders + 1
+        } else {
+            this.subfiles += 1
         }
     }
 }
 
-function isDir(file) {
+const isDir = file => {
     return file.children !== undefined
 }
 
-function processLocation(location, ignoreList, callback) {
+const processLocation = (location, ignoreList, callback) => {
     for (const path of ignoreList) {
         if (location.startsWith(path)) {
             callback(new File(location, 0))
             return
         }
     }
-    fs.access(location, err => {
-        if (err) {
+    fs.access(location, e => {
+        if (e) {
             readErrors.push(
                 `${location} could not be found, but was listed in the folder`)
             callback(new File(location, 0))
             return
         }
-        fs.lstat(location, (err, stats) => {
-            if (err) {
+        fs.lstat(location, (er, stats) => {
+            if (er) {
                 readErrors.push(
-                    `${location} does not allow statistics reading: ${err}`)
+                    `${location} does not allow statistics reading: ${er}`)
                 callback(new File(location, 0))
                 return
             }
@@ -89,15 +92,15 @@ function processLocation(location, ignoreList, callback) {
     })
 }
 
-function prettySize(size) {
+const prettySize = size => {
     if (size < 1024) {
-        return size + " B"
+        return `${size} B`
     }
     const exp = Math.floor(Math.log(size) / Math.log(1024))
     return `${(size / Math.pow(1024, exp)).toFixed(2)} ${"KMGTPE"[exp - 1]}B`
 }
 
-function fillTree(allFiles, elementId) {
+const fillTree = (allFiles, elementId) => {
     const tree = document.getElementById(elementId)
     let treeContents = `<div style="display: flex;">
             <span class="truncate" id="directory-title">
@@ -116,20 +119,20 @@ function fillTree(allFiles, elementId) {
     if (allFiles.children.length === 0) {
         treeContents += "This directory is completely empty"
     }
-    tree.innerHTML = treeContents + "</ul>"
+    tree.innerHTML = `${treeContents}</ul>`
     M.Collapsible.init(document.querySelectorAll(".collapsible"))
 }
 
-function compareSizes(a, b) {
+const compareSizes = (a, b) => {
     if (a.size < b.size) {
         return -1
     }
     return 1
 }
 
-function dirInTree(f, parent, dirSize) {
+const dirInTree = (f, parent, dirSize) => {
     let contents = `<li><div class="collapsible-header"
-        title="${f.size / dirSize *100}%">${progressbar(f.size, dirSize)}
+        title="${f.size / dirSize * 100 || 0}%">${progressbar(f.size, dirSize)}
             <span class="truncate" style="width: 40%;">
                 ${f.name}</span>
             <span class="truncate" style="width: 20%;">
@@ -157,9 +160,9 @@ function dirInTree(f, parent, dirSize) {
     return contents
 }
 
-function fileInTree(f, parent, dirSize) {
+const fileInTree = (f, parent, dirSize) => {
     return `<li><div class="collection-item"
-        title="${f.size / dirSize * 100}%">${progressbar(f.size, dirSize)}
+        title="${f.size / dirSize * 100 || 0}%">${progressbar(f.size, dirSize)}
             <span class="truncate" style="width: 80%;">
                 ${f.name}</span>
             <span class="truncate" style="width: 20%;">
@@ -168,26 +171,28 @@ function fileInTree(f, parent, dirSize) {
         </li>`
 }
 
-function progressbar(current, max) {
+const progressbar = (current, max) => {
     return `<div class="progress" style="height: 10px;">
         <div class="progres-bar" 
             style="background-color: ${progressColor(current / max * 100)};
-            height: 10px;width: ${current / max * 100}%;" role="progressbar">
+            height: 10px;width: ${current / max * 100 || 0}%;"
+            role="progressbar">
         </div></div>`
 }
 
-function progressColor(perc) {
+const progressColor = perc => {
     const bright = (50 - Math.floor(Math.abs(perc - 50))) * 2
-    const red = Math.min(255, Math.max(17, Math.floor(255 - perc*2.4)) + bright)
-    const green = Math.min(255, Math.max(17, Math.floor(perc*2.4)) + bright)
+    const red = Math.min(
+        255, Math.max(17, Math.floor(255 - perc * 2.4)) + bright)
+    const green = Math.min(255, Math.max(17, Math.floor(perc * 2.4)) + bright)
     return `#${red.toString(16)}${green.toString(16)}00`
 }
 
-function emptyReadErrors() {
+const emptyReadErrors = () => {
     readErrors = []
 }
 
-function getReadErrors() {
+const getReadErrors = () => {
     return readErrors
 }
 

@@ -19,14 +19,14 @@ const defaultColor = "#777777"
 
 const disks = []
 
-function getSelectedColors() {
+const getSelectedColors = () => {
     return {
-        filetypes: colors,
-        default: defaultColor
+        "filetypes": colors,
+        "default": defaultColor
     }
 }
 
-function getUnixVolumes() {
+const getUnixVolumes = () => {
     if (disks.length !== 0) {
         return disks
     }
@@ -40,7 +40,7 @@ function getUnixVolumes() {
                     fs.accessSync(disk, fs.constants.R_OK)
                     disks.push(disk)
                 } catch (e) {
-                    //Disk could not be accessed
+                    // Disk could not be accessed
                 }
             }
         }
@@ -50,7 +50,7 @@ function getUnixVolumes() {
     }
 }
 
-function getIgnoreList() {
+const getIgnoreList = () => {
     if (process.platform !== "win32") {
         const ignore = getUnixVolumes().slice()
         ignore.push("/proc")
@@ -59,7 +59,7 @@ function getIgnoreList() {
     return []
 }
 
-function toggleVisualConfig() {
+const toggleVisualConfig = () => {
     const colorConfig = document.getElementById("colors-config")
     const button = document.getElementById("visual-toggle-button")
     if (colorConfig.style.display === "none") {
