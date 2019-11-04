@@ -6,11 +6,12 @@ let allDisks = []
 let folderCounter = 0
 let fileCounter = 0
 
-function pickFolder() {
-    const folders = remote.dialog.showOpenDialogSync(remote.getCurrentWindow(), {
-        title: "Select a folder",
-        properties: ["openDirectory"]
-    })
+const pickFolder = () => {
+    const folders = remote.dialog.showOpenDialogSync(
+        remote.getCurrentWindow(), {
+            "title": "Select a folder",
+            "properties": ["openDirectory"]
+        })
     if (folders === undefined) {
         return
     }
@@ -21,7 +22,7 @@ function pickFolder() {
     updateStartButton()
 }
 
-function go(location) {
+const go = location => {
     folderCounter = 0
     fileCounter = 0
     fs.access(location, err => {
@@ -50,11 +51,11 @@ function go(location) {
     })
 }
 
-function handleErrors() {
+const handleErrors = () => {
     const readErrors = DIR.getReadErrors()
     if (readErrors.length === 0) {
-        document.getElementById("read-errors").textContent =
-            "There were no read errors"
+        document.getElementById("read-errors").textContent
+            = "There were no read errors"
         document.getElementById("read-errors").style.color = "#5c0"
         TABS.switchToTab("start", true)
         return
@@ -75,7 +76,7 @@ function handleErrors() {
     TABS.switchToTab("start", true)
 }
 
-function resetProgressBars() {
+const resetProgressBars = () => {
     const text = document.getElementById("progress-text")
     const scan = document.getElementById("progress-scan")
     const tree = document.getElementById("progress-tree")
@@ -90,7 +91,7 @@ function resetProgressBars() {
     }
 }
 
-function updateCurrentStep(step, current, total) {
+const updateCurrentStep = (step, current, total) => {
     const text = document.getElementById("progress-text")
     const scan = document.getElementById("progress-scan")
     const tree = document.getElementById("progress-tree")
@@ -129,23 +130,23 @@ function updateCurrentStep(step, current, total) {
     }
 }
 
-function updateCounter(type) {
+const updateCounter = type => {
     const text = document.getElementById("progress-text")
     if (type === "Dir") {
         folderCounter += 1
     } else if (type === "File") {
         fileCounter += 1
     }
-    text.textContent =
-        `Scanned ${fileCounter} files and ${folderCounter} folders so far`
+    text.textContent
+        = `Scanned ${fileCounter} files and ${folderCounter} folders so far`
 }
 
-function updateStartButton() {
+const updateStartButton = () => {
     const location = document.getElementById("folder-path").value
     fs.access(location, err => {
         if (err) {
-            document.getElementById("start-button").title =
-                "The selected location is unavailable"
+            document.getElementById("start-button").title
+                = "The selected location is unavailable"
             document.getElementById("start-button").disabled = "disabled"
         } else {
             document.getElementById("start-button").title = undefined
@@ -154,25 +155,25 @@ function updateStartButton() {
     })
 }
 
-function getAllFiles() {
+const getAllFiles = () => {
     return allFiles
 }
 
-function populateDisks() {
+const populateDisks = () => {
     let disks = ["/"]
-    //Platform specific disks
+    // Platform specific disks
     if (process.platform === "win32") {
         try {
             const wmic = "%SystemRoot%\\System32\\Wbem\\wmic.exe"
             const output = exec(`${wmic} logicaldisk get name`).toString()
             disks = []
-            for (const d of output.split("\n").filter(d => /[A-z]:/.test(d))) {
-                const disk =`${d.trim()}\\`
+            for (const d of output.split("\n").filter(l => /[A-z]:/.test(l))) {
+                const disk = `${d.trim()}\\`
                 try {
                     fs.accessSync(disk, fs.constants.R_OK)
                     disks.push(disk)
                 } catch (e) {
-                    //Disk could not be accessed
+                    // Disk could not be accessed
                 }
             }
         } catch (e) {
@@ -181,25 +182,29 @@ function populateDisks() {
     } else {
         disks = SETTINGS.getUnixVolumes()
     }
-    //Add disks as an option to the start tab
+    // Add disks as an option to the start tab
     const diskElement = document.getElementById("pre-configured-folders")
     for (const disk of disks) {
         const button = document.createElement("button")
         button.innerHTML = disk
         button.className = "btn"
-        button.onclick = () => {go(disk)}
+        button.onclick = () => {
+            go(disk)
+        }
         diskElement.appendChild(button)
     }
-    //Add the all disk option
+    // Add the all disk option
     const allButton = document.createElement("button")
     allButton.textContent = "All disks"
     allButton.className = "btn"
-    allButton.onclick = () => {goAllDisks()}
+    allButton.onclick = () => {
+        goAllDisks()
+    }
     diskElement.appendChild(allButton)
     allDisks = disks
 }
 
-function goAllDisks() {
+const goAllDisks = () => {
     folderCounter = 0
     fileCounter = 0
     resetProgressBars()
@@ -207,14 +212,14 @@ function goAllDisks() {
     updateCurrentStep("scan")
     DIR.emptyReadErrors()
     allFiles = {
-        size: 0,
-        name: "All disks",
-        location: "All disks",
-        children: [],
-        subfiles: 0,
-        subfolders: 0,
+        "size": 0,
+        "name": "All disks",
+        "location": "All disks",
+        "children": [],
+        "subfiles": 0,
+        "subfolders": 0,
 
-        add: disk => {
+        "add": disk => {
             allFiles.children.push(disk)
             allFiles.size += disk.size
             allFiles.subfiles += disk.subfiles
@@ -224,7 +229,7 @@ function goAllDisks() {
     processDisk(allDisks[0])
 }
 
-function processDisk(disk) {
+const processDisk = disk => {
     setTimeout(() => {
         const shouldEnableIgnoreList = disk === "/"
         let ignoreList = []
@@ -249,38 +254,43 @@ function processDisk(disk) {
     }, 0)
 }
 
-function saveTree() {
-    const filename = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), {
-        title: "Select the save location",
-        filters: [
-            {name: "JavaScript Object Notation file", extensions: ["json"]}]
-    })
+const saveTree = () => {
+    const filename = remote.dialog.showSaveDialogSync(
+        remote.getCurrentWindow(), {
+            "title": "Select the save location",
+            "filters": [
+                {
+                    "name": "JavaScript Object Notation file",
+                    "extensions": ["json"]
+                }
+            ]
+        })
     if (filename === undefined) {
         return
     }
     const json = {
-        files: allFiles,
-        errors: DIR.getReadErrors()
+        "files": allFiles,
+        "errors": DIR.getReadErrors()
     }
     writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
-function writeToFile(location, contents, encoding="utf8") {
+const writeToFile = (location, contents, encoding = "utf8") => {
     fs.writeFile(location, contents, encoding, err => {
         if (err === null) {
             remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
-                title: "Success",
-                type: "info",
-                buttons: ["Ok"],
-                message: "File saved successfully"
+                "title": "Success",
+                "type": "info",
+                "buttons": ["Ok"],
+                "message": "File saved successfully"
             })
         } else {
             remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
-                title: "Error",
-                type: "error",
-                buttons: ["Ok"],
-                message: "Could not save file",
-                detail: err.toString()
+                "title": "Error",
+                "type": "error",
+                "buttons": ["Ok"],
+                "message": "Could not save file",
+                "detail": err.toString()
             })
         }
     })

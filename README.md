@@ -29,7 +29,7 @@ Clone or download the latest source and run `npm install` and `npm start`.
 
 ### Make your own build
 
-Clone or download the latest source and create your own build with `npm run buildall`, see package.json for platform-specific commands.
+Clone or download the latest source and create your own build with `npm run build`, see package.json for platform-specific commands.
 
 ## Why another *dirstat application?
 
