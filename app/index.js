@@ -18,7 +18,6 @@ app.on("ready", () => {
         }
     })
     mainWindow.setMinimumSize(750, 750)
-    mainWindow.webContents.openDevTools()
     mainWindow.loadURL(url.format({
         "pathname": path.join(__dirname, "index.html"),
         "protocol": "file:"
