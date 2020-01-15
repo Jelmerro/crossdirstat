@@ -143,7 +143,8 @@ const setFilenameOnHover = e => {
     const y = (e.clientY - r.top) / (r.bottom - r.top) * canvas.height
     for (const s of squares) {
         if (x > s.x0 && y > s.y0 && x < s.x1 && y < s.y1) {
-            document.getElementById("file-name").textContent = s.location
+            document.getElementById("file-name").textContent
+                = `${s.location} (${DIR.prettySize(s.size)})`
             return
         }
     }
