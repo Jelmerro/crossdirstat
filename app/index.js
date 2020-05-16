@@ -18,15 +18,12 @@ app.on("ready", () => {
         "icon": path.join(__dirname, "icons/1024x1024.png"),
         "frame": false,
         "webPreferences": {
-            "plugins": true,
-            "enableRemoteModule": false,
-            "nodeIntegration": true
+            "enableRemoteModule": false, "nodeIntegration": true
         }
     })
     mainWindow.setMinimumSize(750, 750)
     mainWindow.loadURL(url.format({
-        "pathname": path.join(__dirname, "index.html"),
-        "protocol": "file:"
+        "pathname": path.join(__dirname, "index.html"), "protocol": "file:"
     }))
     mainWindow.webContents.once("did-finish-load", () => {
         const version = process.env.npm_package_version || app.getVersion()
