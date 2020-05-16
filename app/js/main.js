@@ -66,7 +66,7 @@ const go = location => {
                 allFiles = files
                 updateCurrentStep("tree")
                 setTimeout(() => {
-                    DIR.fillTree(allFiles, "directories")
+                    DIR.fillTree(allFiles)
                     updateCurrentStep("visual")
                     setTimeout(() => {
                         VISUAL.generate()
@@ -86,18 +86,29 @@ const handleErrors = () => {
         TABS.switchToTab("start", true)
         return
     }
-    let readErrorsText = ""
+    document.getElementById("read-errors").textContent = ""
     if (readErrors.length === 1) {
-        readErrorsText = "There was a single read error:<br /><br />"
+        document.getElementById("read-errors").appendChild(
+            document.createTextNode("There was a single read error:"))
+        document.getElementById("read-errors").appendChild(
+            document.createElement("br"))
+        document.getElementById("read-errors").appendChild(
+            document.createElement("br"))
     } else {
-        readErrorsText = "There were a total of "
-        readErrorsText += readErrors.length
-        readErrorsText += " read errors:<br /><br />"
+        document.getElementById("read-errors").appendChild(
+            document.createTextNode(`There were a total of ${
+                readErrors.length} read errors:`))
+        document.getElementById("read-errors").appendChild(
+            document.createElement("br"))
+        document.getElementById("read-errors").appendChild(
+            document.createElement("br"))
     }
-    for (const error of readErrors) {
-        readErrorsText += `${error}<br />`
-    }
-    document.getElementById("read-errors").innerHTML = readErrorsText
+    readErrors.forEach(error => {
+        document.getElementById("read-errors").appendChild(
+            document.createTextNode(error))
+        document.getElementById("read-errors").appendChild(
+            document.createElement("br"))
+    })
     document.getElementById("read-errors").style.color = "#f50"
     TABS.switchToTab("start", true)
 }
@@ -210,7 +221,7 @@ const populateDisks = () => {
     const diskElement = document.getElementById("pre-configured-folders")
     for (const disk of disks) {
         const button = document.createElement("button")
-        button.innerHTML = disk
+        button.textContent = disk
         button.className = "btn"
         button.addEventListener("click", () => {
             go(disk)
@@ -269,7 +280,7 @@ const processDisk = disk => {
             if (allFiles.children.length === allDisks.length) {
                 updateCurrentStep("tree")
                 setTimeout(() => {
-                    DIR.fillTree(allFiles, "directories")
+                    DIR.fillTree(allFiles)
                     updateCurrentStep("visual")
                     setTimeout(() => {
                         VISUAL.generate()

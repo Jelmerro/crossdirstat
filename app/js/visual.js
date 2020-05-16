@@ -87,18 +87,25 @@ const doneStroking = () => {
 const generateStatsAndColors = () => {
     const allColors = SETTINGS.getSelectedColors()
     const colorsElement = document.getElementById("colors-config")
-    colorsElement.innerHTML = ""
+    colorsElement.textContent = ""
     let index = 0
     for (const type of getFiletypesBySize()) {
         let color = allColors.filetypes[index]
         if (!color) {
             color = allColors.default
         }
-        colorsElement.innerHTML += `<div>
-            <input type="color" value="${color}" index="${index}"
-                onchange="VISUAL.colorChange(event)">
-            ${type}<br />${filetypes[type].count} files
-            ${DIR.prettySize(filetypes[type].size)}</div>`
+        const colorDiv = document.createElement("div")
+        const colorInput = document.createElement("input")
+        colorInput.value = color
+        colorInput.index = index
+        colorInput.type = "color"
+        colorDiv.appendChild(colorInput)
+        colorDiv.appendChild(document.createTextNode(type))
+        colorDiv.appendChild(document.createElement("br"))
+        colorDiv.appendChild(
+            document.createTextNode(`${filetypes[type].count} files ${
+                DIR.prettySize(filetypes[type].size)}`))
+        colorsElement.appendChild(colorDiv)
         index += 1
     }
 }
@@ -174,20 +181,22 @@ const filetype = f => {
 }
 
 const saveImage = () => {
+    const buttons = ["SVG", "PNG"]
     let message = "SVG: Vector with filenames as tooltip hover\n"
     message += "PNG: 10000x10000 lossless image render (multiple seconds)\n"
-    message += "JSON: List of squares, colors and filetype statistics"
+    if (!document.querySelector("#directories button").disabled) {
+        message += "JSON: List of squares, colors and filetype statistics"
+        buttons.push("JSON")
+    }
+    buttons.push("Cancel")
     ipcRenderer.invoke("show-message-box", {
-        "type": "question",
-        "title": "Export type",
-        "buttons": ["SVG", "PNG", "JSON", "Cancel"],
-        "message": message
+        "type": "question", "title": "Export type", buttons, message
     }).then(response => {
         if (response === 0) {
             saveSVG()
         } else if (response === 1) {
             savePNG()
-        } else if (response === 2) {
+        } else if (response === 2 && buttons.length === 4) {
             saveJSON()
         }
     })

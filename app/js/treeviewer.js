@@ -101,8 +101,8 @@ const prettySize = size => {
     return `${(size / Math.pow(1024, exp)).toFixed(2)} ${"KMGTPE"[exp - 1]}B`
 }
 
-const fillTree = (allFiles, elementId) => {
-    const tree = document.getElementById(elementId)
+const fillTree = allFiles => {
+    const tree = document.getElementById("directories")
     let treeContents = `<div style="display: flex;">
             <span class="truncate" id="directory-title">
             ${allFiles.name} - ${prettySize(allFiles.size)} containing
@@ -110,9 +110,14 @@ const fillTree = (allFiles, elementId) => {
             <button class="btn" onclick="MAIN.saveTree()">Export tree</button>
         </div><span class="truncate">${allFiles.location}</span>
         <ul class="collapsible">`
+    let complete = true
     for (const f of allFiles.children.sort(compareSizes).reverse()) {
+        if (treeContents.length > 20000000) {
+            complete = false
+            break
+        }
         if (isDir(f)) {
-            treeContents += dirInTree(f, elementId, allFiles.size)
+            treeContents += dirInTree(f, allFiles.size)
         } else {
             treeContents += fileInTree(f, allFiles.size)
         }
@@ -121,6 +126,12 @@ const fillTree = (allFiles, elementId) => {
         treeContents += "This directory is completely empty"
     }
     tree.innerHTML = `${treeContents}</ul>`
+    if (!complete) {
+        document.querySelector("#directories button").disabled = true
+        tree.innerHTML += "<h6>Only a selection of directories are listed here,"
+            + " because of the javascript string length limitation. "
+            + "Use the visual tab to see all files.</h6>"
+    }
     M.Collapsible.init(document.querySelectorAll(".collapsible"))
 }
 
@@ -131,7 +142,7 @@ const compareSizes = (a, b) => {
     return 1
 }
 
-const dirInTree = (f, parent, dirSize) => {
+const dirInTree = (f, dirSize) => {
     let contents = `<li><div class="collapsible-header"
         title="${f.size / dirSize * 100 || 0}%">${progressbar(f.size, dirSize)}
             <span class="truncate" style="width: 40%;">
@@ -147,8 +158,11 @@ const dirInTree = (f, parent, dirSize) => {
         contents += `<div class="collapsible-body"><div class="row">`
         contents += `<div class="col s12 m12"><ul class="collapsible">`
         for (const sub of f.children.sort(compareSizes).reverse()) {
+            if (contents.length > 20000000) {
+                break
+            }
             if (isDir(sub)) {
-                contents += dirInTree(sub, parent, f.size)
+                contents += dirInTree(sub, f.size)
             } else {
                 contents += fileInTree(sub, f.size)
             }
@@ -171,7 +185,7 @@ const fileInTree = (f, dirSize) => `<li><div class="collection-item"
         </li>`
 
 const progressbar = (current, max) => `<div class="progress"
-    style="height: 10px;"><div class="progres-bar" 
+    style="height: 10px;"><div class="progres-bar"
         style="background-color: ${progressColor(current / max * 100)};
         height: 10px;width: ${current / max * 100 || 0}%;"
         role="progressbar">
