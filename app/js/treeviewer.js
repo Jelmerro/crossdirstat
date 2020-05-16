@@ -112,14 +112,16 @@ const fillTree = allFiles => {
         <ul class="collapsible">`
     let complete = true
     for (const f of allFiles.children.sort(compareSizes).reverse()) {
-        if (treeContents.length > 20000000) {
+        try {
+            if (isDir(f)) {
+                treeContents += dirInTree(f, allFiles.size)
+            } else {
+                treeContents += fileInTree(f, allFiles.size)
+            }
+        } catch (e) {
+            // RangeError: String length limit reached
             complete = false
             break
-        }
-        if (isDir(f)) {
-            treeContents += dirInTree(f, allFiles.size)
-        } else {
-            treeContents += fileInTree(f, allFiles.size)
         }
     }
     if (allFiles.children.length === 0) {
@@ -158,13 +160,15 @@ const dirInTree = (f, dirSize) => {
         contents += `<div class="collapsible-body"><div class="row">`
         contents += `<div class="col s12 m12"><ul class="collapsible">`
         for (const sub of f.children.sort(compareSizes).reverse()) {
-            if (contents.length > 20000000) {
+            try {
+                if (isDir(sub)) {
+                    contents += dirInTree(sub, f.size)
+                } else {
+                    contents += fileInTree(sub, f.size)
+                }
+            } catch (e) {
+                // RangeError: String length limit reached
                 break
-            }
-            if (isDir(sub)) {
-                contents += dirInTree(sub, f.size)
-            } else {
-                contents += fileInTree(sub, f.size)
             }
         }
         contents += "</ul></div></div></div></li>"
