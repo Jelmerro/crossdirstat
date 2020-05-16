@@ -2,13 +2,8 @@
 
 const tabs = ["start", "directories", "visual", "progress"]
 
-const currentTab = () => {
-    for (const tab of tabs) {
-        if (document.getElementById(tab).style.display !== "none") {
-            return tab
-        }
-    }
-}
+const currentTab = () => tabs.find(
+    tab => document.getElementById(tab).style.display !== "none")
 
 const switchToTab = (newTab, force = false) => {
     const tabDoesNotExist = tabs.indexOf(newTab) === -1
@@ -33,7 +28,4 @@ const switchToTab = (newTab, force = false) => {
     }
 }
 
-module.exports = {
-    currentTab,
-    switchToTab
-}
+module.exports = {currentTab, switchToTab}

@@ -1,5 +1,7 @@
 "use strict"
-/* global exec fs */
+
+const exec = require("child_process").execSync
+const fs = require("fs")
 
 const colors = [
     "#f44336",
@@ -19,12 +21,7 @@ const defaultColor = "#777777"
 
 const disks = []
 
-const getSelectedColors = () => {
-    return {
-        "filetypes": colors,
-        "default": defaultColor
-    }
-}
+const getSelectedColors = () => ({"filetypes": colors, "default": defaultColor})
 
 const getUnixVolumes = () => {
     if (disks.length !== 0) {
