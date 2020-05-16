@@ -1,5 +1,8 @@
 "use strict"
-/* globals MAIN path fs M */
+/* globals MAIN M */
+
+const fs = require("fs")
+const path = require("path")
 
 let readErrors = []
 
@@ -36,13 +39,11 @@ const Dir = class {
     }
 }
 
-const isDir = file => {
-    return file.children !== undefined
-}
+const isDir = file => file.children
 
 const processLocation = (location, ignoreList, callback) => {
-    for (const path of ignoreList) {
-        if (location.startsWith(path)) {
+    for (const p of ignoreList) {
+        if (location.startsWith(p)) {
             callback(new File(location, 0))
             return
         }
@@ -113,7 +114,7 @@ const fillTree = (allFiles, elementId) => {
         if (isDir(f)) {
             treeContents += dirInTree(f, elementId, allFiles.size)
         } else {
-            treeContents += fileInTree(f, elementId, allFiles.size)
+            treeContents += fileInTree(f, allFiles.size)
         }
     }
     if (allFiles.children.length === 0) {
@@ -149,7 +150,7 @@ const dirInTree = (f, parent, dirSize) => {
             if (isDir(sub)) {
                 contents += dirInTree(sub, parent, f.size)
             } else {
-                contents += fileInTree(sub, parent, f.size)
+                contents += fileInTree(sub, f.size)
             }
         }
         contents += "</ul></div></div></div></li>"
@@ -160,8 +161,7 @@ const dirInTree = (f, parent, dirSize) => {
     return contents
 }
 
-const fileInTree = (f, parent, dirSize) => {
-    return `<li><div class="collection-item"
+const fileInTree = (f, dirSize) => `<li><div class="collection-item"
         title="${f.size / dirSize * 100 || 0}%">${progressbar(f.size, dirSize)}
             <span class="truncate" style="width: 80%;">
                 ${f.name}</span>
@@ -169,16 +169,13 @@ const fileInTree = (f, parent, dirSize) => {
                 ${prettySize(f.size)}</span>
             </div>
         </li>`
-}
 
-const progressbar = (current, max) => {
-    return `<div class="progress" style="height: 10px;">
-        <div class="progres-bar" 
-            style="background-color: ${progressColor(current / max * 100)};
-            height: 10px;width: ${current / max * 100 || 0}%;"
-            role="progressbar">
-        </div></div>`
-}
+const progressbar = (current, max) => `<div class="progress"
+    style="height: 10px;"><div class="progres-bar" 
+        style="background-color: ${progressColor(current / max * 100)};
+        height: 10px;width: ${current / max * 100 || 0}%;"
+        role="progressbar">
+    </div></div>`
 
 const progressColor = perc => {
     const bright = (50 - Math.floor(Math.abs(perc - 50))) * 2
@@ -192,9 +189,7 @@ const emptyReadErrors = () => {
     readErrors = []
 }
 
-const getReadErrors = () => {
-    return readErrors
-}
+const getReadErrors = () => readErrors
 
 module.exports = {
     processLocation,

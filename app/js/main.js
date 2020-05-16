@@ -1,21 +1,47 @@
 "use strict"
-/* global remote TABS DIR VISUAL SETTINGS fs exec */
+/* global TABS DIR VISUAL SETTINGS */
+
+const {ipcRenderer, shell} = require("electron")
+const exec = require("child_process").execSync
+const fs = require("fs")
 
 let allFiles = null
 let allDisks = []
 let folderCounter = 0
 let fileCounter = 0
 
-const pickFolder = () => {
-    const folders = remote.dialog.showOpenDialogSync(
-        remote.getCurrentWindow(), {
-            "title": "Select a folder",
-            "properties": ["openDirectory"]
-        })
-    if (folders === undefined) {
-        return
-    }
-    if (folders.length === 0) {
+const init = () => {
+    populateDisks()
+    document.getElementById("link-me").addEventListener("click", () => {
+        shell.openExternal("https://github.com/Jelmerro")
+    })
+    document.getElementById("link-repo").addEventListener("click", () => {
+        shell.openExternal("https://github.com/Jelmerro/crossdirstat")
+    })
+    document.getElementById("link-releases").addEventListener("click", () => {
+        shell.openExternal("https://github.com/Jelmerro/crossdirstat/releases")
+    })
+    document.getElementById("menu-start").addEventListener(
+        "click", () => TABS.switchToTab("start"))
+    document.getElementById("menu-directories").addEventListener(
+        "click", () => TABS.switchToTab("directories"))
+    document.getElementById("menu-visual").addEventListener(
+        "click", () => TABS.switchToTab("visual"))
+    document.querySelector(".close-button").addEventListener(
+        "click", () => ipcRenderer.invoke("quit-app"))
+    document.getElementById("save-image").addEventListener(
+        "click", () => VISUAL.saveImage())
+    document.getElementById("visual-toggle-button").addEventListener(
+        "click", () => SETTINGS.toggleVisualConfig())
+    document.getElementById("square-view").addEventListener(
+        "mousemove", VISUAL.setFilenameOnHover)
+}
+
+const pickFolder = async () => {
+    const folders = await ipcRenderer.invoke("show-open-dialog", {
+        "title": "Select a folder", "properties": ["openDirectory"]
+    })
+    if (!folders || !folders.length) {
         return
     }
     document.getElementById("folder-path").value = folders[0]
@@ -149,15 +175,13 @@ const updateStartButton = () => {
                 = "The selected location is unavailable"
             document.getElementById("start-button").disabled = "disabled"
         } else {
-            document.getElementById("start-button").title = undefined
+            document.getElementById("start-button").title = ""
             document.getElementById("start-button").removeAttribute("disabled")
         }
     })
 }
 
-const getAllFiles = () => {
-    return allFiles
-}
+const getAllFiles = () => allFiles
 
 const populateDisks = () => {
     let disks = ["/"]
@@ -188,20 +212,25 @@ const populateDisks = () => {
         const button = document.createElement("button")
         button.innerHTML = disk
         button.className = "btn"
-        button.onclick = () => {
+        button.addEventListener("click", () => {
             go(disk)
-        }
+        })
         diskElement.appendChild(button)
     }
     // Add the all disk option
     const allButton = document.createElement("button")
     allButton.textContent = "All disks"
     allButton.className = "btn"
-    allButton.onclick = () => {
-        goAllDisks()
-    }
+    allButton.addEventListener("click", goAllDisks)
     diskElement.appendChild(allButton)
     allDisks = disks
+    // Add event listener to existing elements
+    document.getElementById("folder-path")
+        .addEventListener("input", updateStartButton)
+    document.getElementById("start-button").addEventListener("click", () => {
+        go(document.getElementById("folder-path").value)
+    })
+    document.getElementById("pick-button").addEventListener("click", pickFolder)
 }
 
 const goAllDisks = () => {
@@ -218,7 +247,6 @@ const goAllDisks = () => {
         "children": [],
         "subfiles": 0,
         "subfolders": 0,
-
         "add": disk => {
             allFiles.children.push(disk)
             allFiles.size += disk.size
@@ -254,52 +282,43 @@ const processDisk = disk => {
     }, 0)
 }
 
-const saveTree = () => {
-    const filename = remote.dialog.showSaveDialogSync(
-        remote.getCurrentWindow(), {
-            "title": "Select the save location",
-            "filters": [
-                {
-                    "name": "JavaScript Object Notation file",
-                    "extensions": ["json"]
-                }
-            ]
-        })
-    if (filename === undefined) {
+const saveTree = async () => {
+    const filename = await ipcRenderer.invoke("show-save-dialog", {
+        "title": "Select the save location",
+        "filters": [{
+            "name": "JavaScript Object Notation file", "extensions": ["json"]
+        }]
+    })
+    if (!filename) {
         return
     }
-    const json = {
-        "files": allFiles,
-        "errors": DIR.getReadErrors()
-    }
+    const json = {"files": allFiles, "errors": DIR.getReadErrors()}
     writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
 const writeToFile = (location, contents, encoding = "utf8") => {
     fs.writeFile(location, contents, encoding, err => {
-        if (err === null) {
-            remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
-                "title": "Success",
-                "type": "info",
-                "buttons": ["Ok"],
-                "message": "File saved successfully"
-            })
-        } else {
-            remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
+        if (err) {
+            ipcRenderer.invoke("show-message-box", {
                 "title": "Error",
                 "type": "error",
                 "buttons": ["Ok"],
                 "message": "Could not save file",
                 "detail": err.toString()
             })
+        } else {
+            ipcRenderer.invoke("show-message-box", {
+                "title": "Success",
+                "type": "info",
+                "buttons": ["Ok"],
+                "message": "File saved successfully"
+            })
         }
     })
 }
 
 module.exports = {
-    go,
-    populateDisks,
-    pickFolder,
+    init,
     handleErrors,
     updateCurrentStep,
     updateCounter,

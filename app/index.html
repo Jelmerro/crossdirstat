@@ -10,10 +10,10 @@
 <body>
     <nav>
         <span id="title">crossdirstat</span>
-        <span class="menu-item selected" id="menu-start" onclick="TABS.switchToTab('start')">Start</span>
-        <span class="menu-item" id="menu-directories" onclick="TABS.switchToTab('directories')">Directories</span>
-        <span class="menu-item" id="menu-visual" onclick="TABS.switchToTab('visual')">Visual</span>
-        <button class="btn white-text red close-button" onclick="remote.getCurrentWindow().close()">X</button>
+        <span class="menu-item selected" id="menu-start">Start</span>
+        <span class="menu-item" id="menu-directories">Directories</span>
+        <span class="menu-item" id="menu-visual">Visual</span>
+        <button class="btn white-text red close-button">X</button>
     </nav>
     <main class="container-fluid">
         <div id="progress" style="display: none;">
@@ -48,9 +48,9 @@
             <div class="row">
                 <div id="custom-folder">
                     <h4>Scan a custom folder</h4>
-                    <input id="folder-path" type="text" placeholder="Folder location" oninput="MAIN.updateStartButton()"></input>
-                    <button id="start-button" class="btn" onclick="MAIN.go(document.getElementById('folder-path').value)" disabled>Scan folder</button>
-                    <button class="btn" onclick="MAIN.pickFolder()">Browse</button>
+                    <input id="folder-path" type="text" placeholder="Folder location"></input>
+                    <button id="start-button" class="btn" disabled>Scan folder</button>
+                    <button id="pick-button" class="btn">Browse</button>
                 </div>
                 <div id="pre-configured-folders">
                     <h4>Scan an entire disk</h4>
@@ -59,10 +59,11 @@
             <div class="row">
                 crossdirstat is an easy directory statistics program,
                 which is available for a wide range of operating systems.
-                It is created by <span class="link" onclick="shell.openExternal('https://github.com/jelmerro')">Jelmer van Arnhem</span>
+                It is created by <span class="link" id="link-me">Jelmer van Arnhem</span>
                 and can be copied under the terms of the MIT license.
-                The source code can be found on <span class="link" onclick="shell.openExternal('https://github.com/jelmerro/crossdirstat')">github</span>.
-                Version <span id="version"></span> is currently running, see the <span class="link" onclick="shell.openExternal('https://github.com/jelmerro/crossdirstat/releases')">release page</span> for new versions.
+                The source code can be found on <span class="link" id="link-repo">github</span>.
+                Version <span id="version"></span> is currently running,
+                see the <span class="link" id="link-releases">release page</span> for new versions.
             </div>
             <div class="row">
                 <div id="read-errors"></div>
@@ -75,34 +76,24 @@
         </div>
         <div id="visual" style="display: none;">
             <div style="display: flex;">
-                <button class="btn" onclick="VISUAL.saveImage()" disabled>Export/Save</button>
+                <button class="btn" id="save-image" disabled>Export/Save</button>
                 <span class="truncate" id="file-name">Select a directory from the start tab first</span>
-                <button class="btn" id="visual-toggle-button" onclick="SETTINGS.toggleVisualConfig()" disabled>Show colors</button>
+                <button class="btn" id="visual-toggle-button" disabled>Show colors</button>
             </div>
             <div style="display: flex;">
-                <canvas id="square-view" width="10000px" height="10000px" onmousemove="VISUAL.setFilenameOnHover(event)">
-                </canvas>
+                <canvas id="square-view" width="10000px" height="10000px"></canvas>
                 <div id="colors-config" style="display: none;"></div>
             </div>
         </div>
     </main>
-    <script>if (typeof module === "object") {window.module = module; module = undefined}</script>
     <script src="../node_modules/materialize-css/dist/js/materialize.js"></script>
     <script>
-        const { remote, shell } = require("electron")
-        const exec = require("child_process").execSync
-        const fs = require("fs")
-        const path = require("path")
-        const squarify = require("squarify")
         const MAIN = require("./js/main.js")
         const TABS = require("./js/tabs.js")
         const DIR = require("./js/treeviewer.js")
         const VISUAL = require("./js/visual.js")
         const SETTINGS = require("./js/settings.js")
-        const version = process.env.npm_package_version || remote.app.getVersion()
-        document.getElementById("version").textContent = version
-        if (window.module) module = window.module
-        MAIN.populateDisks()
+        MAIN.init()
     </script>
 </body>
 </html>

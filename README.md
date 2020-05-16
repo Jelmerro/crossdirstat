@@ -3,7 +3,7 @@ crossdirstat
 
 ![crossdirstat](app/icons/128x128.png)
 
-Free open-source cross-platform file & directory statistics as found on [Github](https://github.com/jelmerro/crossdirstat)
+Free open-source cross-platform file & directory statistics as found on [Github](https://github.com/Jelmerro/crossdirstat)
 
 ## Features
 
@@ -21,7 +21,7 @@ The 2nd and 3rd mentioned give you the option to modify and check the source cod
 
 ### Easy download
 
-Download a stable installer or executable for your platform from the [github releases page](https://github.com/jelmerro/crossdirstat/releases).
+Download a stable installer or executable for your platform from the [github releases page](https://github.com/Jelmerro/crossdirstat/releases).
 
 ### Run directly
 
@@ -47,7 +47,7 @@ All the alternatives are great programs, but none of them are a perfect fit for 
 
 ## License
 
-crossdirstat was made by [Jelmer van Arnhem](https://github.com/jelmerro) and is MIT licensed, see LICENSE for details.
+crossdirstat was made by [Jelmer van Arnhem](https://github.com/Jelmerro) and is MIT licensed, see LICENSE for details.
 
 This project makes use of the following libraries:
 
