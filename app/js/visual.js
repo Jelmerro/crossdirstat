@@ -97,8 +97,9 @@ const generateStatsAndColors = () => {
         const colorDiv = document.createElement("div")
         const colorInput = document.createElement("input")
         colorInput.value = color
-        colorInput.index = index
         colorInput.type = "color"
+        colorInput.setAttribute("index", index)
+        colorInput.addEventListener("change", colorChange)
         colorDiv.appendChild(colorInput)
         colorDiv.appendChild(document.createTextNode(type))
         colorDiv.appendChild(document.createElement("br"))
@@ -271,7 +272,6 @@ const saveJSON = async () => {
 
 module.exports = {
     generate,
-    colorChange,
     getFiletypesBySize,
     setFilenameOnHover,
     saveImage

@@ -8,21 +8,30 @@ linux:
     - target: AppImage
       arch:
         - x64
+        - arm64
     - target: deb
       arch:
         - x64
+        - arm64
     - target: freebsd
       arch:
         - x64
+        - arm64
+    - target: pacman
+      arch:
+        - x64
+        - arm64
     - target: rpm
       arch:
         - x64
+        - arm64
     - target: snap
       arch:
         - x64
     - target: tar.gz
       arch:
         - x64
+        - arm64
 rpm:
   fpm:
     - --rpm-rpmbuild-define=_build_id_links none
@@ -32,11 +41,6 @@ mac:
     - target: zip
       arch:
         - x64
-  extraFiles:
-    - from: README.md
-      to: ../../README.md
-    - from: LICENSE
-      to: ../../LICENSE
 win:
   icon: app/icons/512x512.png
   legalTrademarks: Copyright @ Jelmer van Arnhem | Licensed as free software (MIT)
@@ -47,6 +51,9 @@ win:
     - target: portable
       arch:
         - x64
+    - target: zip
+      arch:
+        - arm64
 nsis:
   oneClick: false
   license: LICENSE

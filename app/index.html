@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="../node_modules/materialize-css/dist/css/materialize.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="main.css">
-    <title>crossdirstat</title>
+    <link href="main.css" rel="stylesheet" type="text/css">
+    <meta http-equiv="Content-Security-Policy" content="font-src file://*; img-src file://* data:; object-src 'none'; style-src 'unsafe-inline' file://*; script-src 'unsafe-inline' file://*; default-src 'none'">
 </head>
 <body>
     <nav>
@@ -87,13 +85,5 @@
         </div>
     </main>
     <script src="../node_modules/materialize-css/dist/js/materialize.js"></script>
-    <script>
-        const MAIN = require("./js/main.js")
-        const TABS = require("./js/tabs.js")
-        const DIR = require("./js/treeviewer.js")
-        const VISUAL = require("./js/visual.js")
-        const SETTINGS = require("./js/settings.js")
-        MAIN.init()
-    </script>
 </body>
 </html>

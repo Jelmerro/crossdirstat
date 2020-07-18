@@ -13,12 +13,18 @@ let mainWindow = null
 app.on("ready", () => {
     const {width, height} = screen.getPrimaryDisplay().workAreaSize
     mainWindow = new BrowserWindow({
+        "title": "crossdirstat",
         "width": Math.floor(width / 1.5),
         "height": Math.floor(height / 1.33),
         "icon": path.join(__dirname, "icons/1024x1024.png"),
         "frame": false,
         "webPreferences": {
-            "enableRemoteModule": false, "nodeIntegration": true
+            "preload": path.join(__dirname, "apploader.js"),
+            "sandbox": false,
+            "contextIsolation": false,
+            "disableBlinkFeatures": "Auxclick",
+            "nodeIntegration": false,
+            "enableRemoteModule": false
         }
     })
     mainWindow.setMinimumSize(750, 750)
