@@ -147,8 +147,7 @@ const compareSizes = (a, b) => {
 const dirInTree = (f, dirSize) => {
     let contents = `<li><div class="collapsible-header"
         title="${f.size / dirSize * 100 || 0}%">${progressbar(f.size, dirSize)}
-            <span class="truncate" style="width: 40%;">
-                ${f.name}</span>
+            <span class="truncate" style="width: 40%;">${f.name}</span>
             <span class="truncate" style="width: 20%;">
                 ${prettySize(f.size)}</span>
             <span class="truncate" style="width: 20%;">
@@ -181,8 +180,7 @@ const dirInTree = (f, dirSize) => {
 
 const fileInTree = (f, dirSize) => `<li><div class="collection-item"
         title="${f.size / dirSize * 100 || 0}%">${progressbar(f.size, dirSize)}
-            <span class="truncate" style="width: 80%;">
-                ${f.name}</span>
+            <span class="truncate" style="width: 80%;">${f.name}</span>
             <span class="truncate" style="width: 20%;">
                 ${prettySize(f.size)}</span>
             </div>
@@ -191,8 +189,7 @@ const fileInTree = (f, dirSize) => `<li><div class="collection-item"
 const progressbar = (current, max) => `<div class="progress"
     style="height: 10px;"><div class="progres-bar"
         style="background-color: ${progressColor(current / max * 100)};
-        height: 10px;width: ${current / max * 100 || 0}%;"
-        role="progressbar">
+        height: 10px;width: ${current / max * 100 || 0}%;" role="progressbar">
     </div></div>`
 
 const progressColor = perc => {
@@ -210,9 +207,5 @@ const emptyReadErrors = () => {
 const getReadErrors = () => readErrors
 
 module.exports = {
-    processLocation,
-    fillTree,
-    prettySize,
-    emptyReadErrors,
-    getReadErrors
+    processLocation, fillTree, prettySize, emptyReadErrors, getReadErrors
 }

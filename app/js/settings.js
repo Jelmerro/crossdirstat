@@ -69,8 +69,5 @@ const toggleVisualConfig = () => {
 }
 
 module.exports = {
-    getSelectedColors,
-    getIgnoreList,
-    getUnixVolumes,
-    toggleVisualConfig
+    getSelectedColors, getIgnoreList, getUnixVolumes, toggleVisualConfig
 }

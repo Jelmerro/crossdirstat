@@ -207,8 +207,7 @@ const saveSVG = async () => {
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "title": "Select the save location",
         "filters": [{
-            "name": "Scalable Vector Graphics file",
-            "extensions": ["svg"]
+            "name": "Scalable Vector Graphics file", "extensions": ["svg"]
         }]
     })
     if (!filename) {
@@ -255,8 +254,7 @@ const saveJSON = async () => {
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "title": "Select the save location",
         "filters": [{
-            "name": "JavaScript Object Notation file",
-            "extensions": ["json"]
+            "name": "JavaScript Object Notation file", "extensions": ["json"]
         }]
     })
     if (!filename) {
@@ -270,9 +268,4 @@ const saveJSON = async () => {
     MAIN.writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
-module.exports = {
-    generate,
-    getFiletypesBySize,
-    setFilenameOnHover,
-    saveImage
-}
+module.exports = {generate, getFiletypesBySize, setFilenameOnHover, saveImage}
