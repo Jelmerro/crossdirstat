@@ -1,6 +1,6 @@
 {
   "name": "crossdirstat",
-  "version": "1.5.0-dev",
+  "version": "1.5.0",
   "description": "Free open-source cross-platform file & directory statistics",
   "main": "app/index.js",
   "scripts": {
