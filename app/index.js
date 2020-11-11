@@ -1,11 +1,5 @@
 "use strict"
-const {
-    app,
-    BrowserWindow,
-    dialog,
-    ipcMain,
-    screen
-} = require("electron")
+const {app, BrowserWindow, dialog, ipcMain, screen} = require("electron")
 const path = require("path")
 const url = require("url")
 let mainWindow = null

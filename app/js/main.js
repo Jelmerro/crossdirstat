@@ -68,9 +68,7 @@ const go = location => {
                 setTimeout(() => {
                     DIR.fillTree(allFiles)
                     updateCurrentStep("visual")
-                    setTimeout(() => {
-                        VISUAL.generate()
-                    }, 30)
+                    setTimeout(VISUAL.generate, 30)
                 }, 30)
             })
         }
@@ -223,9 +221,7 @@ const populateDisks = () => {
         const button = document.createElement("button")
         button.textContent = disk
         button.className = "btn"
-        button.addEventListener("click", () => {
-            go(disk)
-        })
+        button.addEventListener("click", () => go(disk))
         diskElement.appendChild(button)
     }
     // Add the all disk option
@@ -282,9 +278,7 @@ const processDisk = disk => {
                 setTimeout(() => {
                     DIR.fillTree(allFiles)
                     updateCurrentStep("visual")
-                    setTimeout(() => {
-                        VISUAL.generate()
-                    }, 30)
+                    setTimeout(VISUAL.generate, 30)
                 }, 30)
             } else {
                 processDisk(allDisks[allFiles.children.length])
