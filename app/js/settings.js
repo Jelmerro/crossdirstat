@@ -25,9 +25,8 @@ const getUnixVolumes = () => {
         return disks
     }
     try {
-        // TODO fix "Operation not permitted error" for "/run/user/xxx/doc/"
         const {execSync} = require("child_process")
-        const output = execSync("df -lkP | grep ^/").toString()
+        const output = execSync("df -lkP 2>/dev/null | grep ^/").toString()
         const lines = output.split("\n")
         for (const line of lines) {
             const disk = line.split(" ").pop()
