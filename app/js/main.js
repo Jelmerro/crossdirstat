@@ -33,6 +33,20 @@ const init = () => {
         "click", () => SETTINGS.toggleVisualConfig())
     document.getElementById("square-view").addEventListener(
         "mousemove", VISUAL.setFilenameOnHover)
+    window.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+            if (e.target === document.getElementById("folder-path")) {
+                const {access} = require("fs")
+                access(e.target.value, err => {
+                    if (!err) {
+                        go(e.target.value)
+                    }
+                })
+            } else if (e.target.tagName.toLowerCase() !== "button") {
+                e.target.click()
+            }
+        }
+    })
 }
 
 const pickFolder = async () => {

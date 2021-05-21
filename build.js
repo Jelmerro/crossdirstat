@@ -32,7 +32,8 @@ process.argv.slice(1).forEach(a => {
 builder.build(builds).then(e => {
     if (isDir("dist/mac/crossdirstat.app/")) {
         rimraf("dist/crossdirstat-*-mac.zip")
-        const stream = fs.createWriteStream(`dist/crossdirstat-${version}-mac.zip`)
+        const stream = fs.createWriteStream(
+            `dist/crossdirstat-${version}-mac.zip`)
         const archive = archiver("zip", {"zlib": {"level": 9}})
         archive.pipe(stream)
         archive.directory("dist/mac/crossdirstat.app/", "crossdirstat.app")

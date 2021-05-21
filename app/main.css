@@ -1,8 +1,8 @@
 /* general */
 html, body {width: 100vw;height: 100vh;}
-body {font: 13px sans-serif !important;overflow: hidden;color: #444;background: white;}
+body {font: 14px sans-serif !important;overflow: hidden;color: #444;background: white;}
 main {padding: 1em;height: calc(100vh - 6.5em);overflow-y: auto;}
-* {margin: 0;padding: 0;line-height: 1.5;user-select: none;}
+* {margin: 0;padding: 0;line-height: 1.5;user-select: none;outline: none;transition: box-shadow .2s linear,background-color .2s linear, color .2s linear, border-color .2s linear;}
 ul, li {list-style: none;}
 h2 {margin-top: 1em;}
 .truncate {text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
@@ -11,11 +11,13 @@ h2 {margin-top: 1em;}
 /* navigation */
 nav {height: 4.5em !important;background-color: #fc0;display: flex;}
 #title {position: absolute;text-align: center;font-size: 2.5em;-webkit-app-region: drag;right: 0;left: 0;height: 1.8em;align-content: center;top: .1em;}
-.menu-item {font-size: 1.2em;display: inline-flex;-webkit-app-region: no-drag;cursor: pointer;position: relative;z-index: 10;padding: 0 1em;align-items: center;}
+.menu-item {font-size: 1.2em;display: inline-flex;-webkit-app-region: no-drag;cursor: pointer;position: relative;z-index: 10;padding: 0 1em;align-items: center;border: solid transparent .2em;}
+.menu-item:focus {border-top: .2em solid #fa0;}
 .selected {background-color: white;font-weight: bold;}
 .close-button {height: 3em;font-weight: bold;-webkit-app-region: no-drag;position: absolute;right: .5em;top: .5em;}
 /* progress */
 #progress {min-width: 700px;width: 50vw;margin: auto;text-align: center;}
+#progress * {transition: width .2s linear;}
 #progress .progress {width: 20vw;height: 1em;background-color: #eee;display: flex;}
 #progress .progress-label {width: 20vw;text-align: center;}
 @keyframes rotate360 {to {transform: rotate(360deg) rotateY(360deg) rotateZ(-360deg);}}
@@ -24,13 +26,13 @@ nav {height: 4.5em !important;background-color: #fc0;display: flex;}
 #welcome {font-size: 3em;min-height: 4em;margin: auto;display: flex;align-items: center;}
 #welcome img {height: 4em;padding-right: 2em;}
 #start {min-width: 700px;width: 50vw;margin: auto;}
-#folder-path {width: 100%;border: .2em transparent solid;border-bottom: .2em #ddd solid;padding: .5em 0 .5em 1em;margin: .5em 0;outline: none;}
+#folder-path {width: 100%;border: .2em transparent solid;border-bottom: .2em #ddd solid;padding: .5em 0 .5em 1em;margin: .5em 0;}
 #folder-path::selection {background-color: #fc0;color: #333;}
-#folder-path:focus {border: .2em solid #fc0;}
+#folder-path:focus {border: .2em solid #fa0;}
 #folder-path::placeholder {font-style: italic;}
 #custom-folder button, #pre-configured-folders button {margin: .5em;}
-.link {color: #fa0;}
-.link:hover {text-decoration: underline;cursor: pointer;}
+.link {color: #fc0;font-weight: bold;}
+.link:hover, .link:focus {color: #fa0;cursor: pointer;text-decoration: underline;}
 #start > div:last-child {overflow-y: auto;}
 #read-errors {margin-top: 1em;user-select: text;}
 #read-errors::selection {background-color: #ddd;}
@@ -40,7 +42,7 @@ nav {height: 4.5em !important;background-color: #fc0;display: flex;}
 #directories .dir {border: solid .1em #fc0;margin: .5em 2em;}
 #directories .file {display: flex;flex-wrap: wrap;border: .1em solid #ddd;padding: .5em;margin: .5em 2em;}
 #directory-title {line-height: 100%;font-size: 1.7em;padding: .5em .5em .5em 0;flex: 1;}
-#directories .progress {width: 100%;margin: .5em 0;background-color: #ddd;outline: 2px solid white;display: flex;height: 1em;}
+#directories .progress {width: 100%;margin: .5em 0;background-color: #ddd;outline: .2em solid white;display: flex;height: 1em;}
 #directories > ul {overflow-y: auto;max-height: calc(100vh - 13em);margin: 1em 0 0 0;}
 #directories button {width: 12em;min-width: 12em;}
 /* visual */
@@ -48,8 +50,13 @@ nav {height: 4.5em !important;background-color: #fc0;display: flex;}
 #file-name {margin: auto;padding: .5em;}
 #visual button {width: 12em;min-width: 12em;}
 #colors-config {margin: 1em 0 0 1em;max-height: calc(100vh - 10.5em);overflow-y: auto;}
+#colors-config > div {display: flex;align-items: center;justify-content: space-between;}
+#colors-config .type {width: 5em;line-height: 1;}
+#colors-config .count {width: 10em;line-height: 1;}
+#colors-config [type="color"] {height: 2em;width: 2em;border-radius: 0;margin: .1em .5em .1em .1em;}
+#colors-config [type="color"]:focus {outline: .1em #fa0 solid;;}
 /* button */
-.btn {padding: .5em 1em;background-color: #fc0;color: #333;border: none;text-transform: uppercase;font-weight: bold;box-shadow: #4444 .1em .1em .5em;cursor: pointer;transition: box-shadow .2s linear,background-color .2s linear;outline: none;}
+.btn {padding: .5em 1em;background-color: #fc0;color: #333;border: none;font-weight: bold;box-shadow: #4444 .1em .1em .5em;cursor: pointer;}
 .btn:active, .btn:focus {background-color: #fa0;}
 .btn:hover:not(:disabled) {background-color: #fa0;box-shadow: #444b .1em .1em .5em;}
-.btn:disabled {background-color: #ddd;cursor: not-allowed;}
+.btn:disabled {color: #777;background-color: #ddd;cursor: not-allowed;}

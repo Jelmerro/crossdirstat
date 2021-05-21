@@ -7,10 +7,10 @@
 <body>
     <nav>
         <span id="title">crossdirstat</span>
-        <span class="menu-item selected" id="menu-start">Start</span>
-        <span class="menu-item" id="menu-directories">Directories</span>
-        <span class="menu-item" id="menu-visual">Visual</span>
-        <button class="btn white-text red close-button">X</button>
+        <span tabindex="0" class="menu-item selected" id="menu-start">Start</span>
+        <span tabindex="0" class="menu-item" id="menu-directories">Directories</span>
+        <span tabindex="0" class="menu-item" id="menu-visual">Visual</span>
+        <button class="btn close-button">X</button>
     </nav>
     <main>
         <div id="progress" style="display: none;">
@@ -22,18 +22,10 @@
                 <span class="progress-label">Generate canvas</span>
             </div>
             <div style="display: flex;">
-                <span class="progress">
-                    <div id="progress-scan"></div>
-                </span>
-                <span class="progress">
-                    <div id="progress-tree"></div>
-                </span>
-                <span class="progress">
-                    <div id="progress-squarify"></div>
-                </span>
-                <span class="progress">
-                    <div id="progress-canvas"></div>
-                </span>
+                <span class="progress"><div id="progress-scan"></div></span>
+                <span class="progress"><div id="progress-tree"></div></span>
+                <span class="progress"><div id="progress-squarify"></div></span>
+                <span class="progress"><div id="progress-canvas"></div></span>
             </div>
             <div id="progress-text"></div>
         </div>
@@ -41,6 +33,15 @@
             <div id="welcome">
                 <img src="icons/1024x1024.png">
                 <span>Welcome to crossdirstat</span>
+            </div>
+            <div>
+                crossdirstat is an easy directory statistics program,
+                which is available for a wide range of operating systems.
+                It is created by <span tabindex="0" class="link" id="link-me">Jelmer van Arnhem</span>
+                and can be copied under the terms of the MIT license.
+                The source code can be found on <span tabindex="0" class="link" id="link-repo">github</span>.
+                Version <span id="version"></span> is currently running,
+                see the <span tabindex="0" class="link" id="link-releases">release page</span> for new versions.
             </div>
             <div>
                 <div id="custom-folder">
@@ -52,15 +53,6 @@
                 <div id="pre-configured-folders">
                     <h2>Scan an entire disk</h2>
                 </div>
-            </div>
-            <div>
-                crossdirstat is an easy directory statistics program,
-                which is available for a wide range of operating systems.
-                It is created by <span class="link" id="link-me">Jelmer van Arnhem</span>
-                and can be copied under the terms of the MIT license.
-                The source code can be found on <span class="link" id="link-repo">github</span>.
-                Version <span id="version"></span> is currently running,
-                see the <span class="link" id="link-releases">release page</span> for new versions.
             </div>
             <div id="read-errors"></div>
         </div>

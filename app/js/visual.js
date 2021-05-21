@@ -99,11 +99,15 @@ const generateStatsAndColors = () => {
         colorInput.setAttribute("index", index)
         colorInput.addEventListener("change", colorChange)
         colorDiv.appendChild(colorInput)
-        colorDiv.appendChild(document.createTextNode(type))
-        colorDiv.appendChild(document.createElement("br"))
-        colorDiv.appendChild(
-            document.createTextNode(`${filetypes[type].count} files ${
-                DIR.prettySize(filetypes[type].size)}`))
+        const typeEl = document.createElement("span")
+        typeEl.textContent = type
+        typeEl.className = "type"
+        colorDiv.appendChild(typeEl)
+        const countEl = document.createElement("span")
+        countEl.className = "count"
+        countEl.textContent = `${filetypes[type].count} files ${
+            DIR.prettySize(filetypes[type].size)}`
+        colorDiv.appendChild(countEl)
         colorsElement.appendChild(colorDiv)
         index += 1
     }
