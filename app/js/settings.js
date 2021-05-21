@@ -1,8 +1,5 @@
 "use strict"
 
-const exec = require("child_process").execSync
-const fs = require("fs")
-
 const colors = [
     "#f44336",
     "#ba68c8",
@@ -28,13 +25,16 @@ const getUnixVolumes = () => {
         return disks
     }
     try {
-        const output = exec("df -lkP | grep ^/").toString()
+        // TODO fix "Operation not permitted error" for "/run/user/xxx/doc/"
+        const {execSync} = require("child_process")
+        const output = execSync("df -lkP | grep ^/").toString()
         const lines = output.split("\n")
         for (const line of lines) {
             const disk = line.split(" ").pop()
             if (disk.length > 0) {
                 try {
-                    fs.accessSync(disk, fs.constants.R_OK)
+                    const {accessSync, constants} = require("fs")
+                    accessSync(disk, constants.R_OK)
                     disks.push(disk)
                 } catch (e) {
                     // Disk could not be accessed
@@ -48,12 +48,12 @@ const getUnixVolumes = () => {
 }
 
 const getIgnoreList = () => {
-    if (process.platform !== "win32") {
-        const ignore = getUnixVolumes().slice()
-        ignore.push("/proc")
-        return ignore.filter(d => d !== "/")
+    if (process.platform === "win32") {
+        return []
     }
-    return []
+    const ignore = getUnixVolumes().slice()
+    ignore.push("/proc")
+    return ignore.filter(d => d !== "/")
 }
 
 const toggleVisualConfig = () => {

@@ -1,9 +1,6 @@
 "use strict"
 /* global MAIN SETTINGS DIR */
 
-const {ipcRenderer} = require("electron")
-const squarify = require("squarify")
-
 let filetypes = {}
 let callbacks = 0
 let squares = []
@@ -25,8 +22,9 @@ const generate = () => {
     }
     const processedFiles = processNode(allFiles)
     MAIN.updateCurrentStep("squarify", 0, processedFiles.subfiles)
+    const {"default": squarify} = require("squarify")
     setTimeout(() => {
-        squares = squarify.default(processedFiles.children, {
+        squares = squarify(processedFiles.children, {
             "x0": 0, "y0": 0, "x1": 10000, "y1": 10000
         })
         setTimeout(parseSquares, 30)
@@ -54,7 +52,7 @@ const parseSquares = () => {
                 ctx.fillRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0)
             }
             doneStroking()
-        }, 1)
+        }, 0)
     }
     document.querySelectorAll(`#visual button`).forEach(b => {
         b.removeAttribute("disabled")
@@ -190,6 +188,7 @@ const saveImage = () => {
         buttons.push("JSON")
     }
     buttons.push("Cancel")
+    const {ipcRenderer} = require("electron")
     ipcRenderer.invoke("show-message-box", {
         "type": "question", "title": "Export type", buttons, message
     }).then(response => {
@@ -204,6 +203,7 @@ const saveImage = () => {
 }
 
 const saveSVG = async () => {
+    const {ipcRenderer} = require("electron")
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "title": "Select the save location",
         "filters": [{
@@ -236,6 +236,7 @@ const saveSVG = async () => {
 }
 
 const savePNG = async () => {
+    const {ipcRenderer} = require("electron")
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "title": "Select the save location",
         "filters": [{
@@ -251,6 +252,7 @@ const savePNG = async () => {
 }
 
 const saveJSON = async () => {
+    const {ipcRenderer} = require("electron")
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "title": "Select the save location",
         "filters": [{
@@ -268,4 +270,4 @@ const saveJSON = async () => {
     MAIN.writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
-module.exports = {generate, getFiletypesBySize, setFilenameOnHover, saveImage}
+module.exports = {generate, setFilenameOnHover, saveImage}

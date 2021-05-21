@@ -2,8 +2,6 @@
 /* global TABS DIR VISUAL SETTINGS */
 
 const {ipcRenderer, shell} = require("electron")
-const exec = require("child_process").execSync
-const fs = require("fs")
 
 let allFiles = null
 let allDisks = []
@@ -48,21 +46,21 @@ const pickFolder = async () => {
     updateStartButton()
 }
 
-const go = location => {
+const go = loc => {
     folderCounter = 0
     fileCounter = 0
-    fs.access(location, err => {
+    const {access} = require("fs")
+    access(loc, err => {
         if (!err) {
             resetProgressBars()
             TABS.switchToTab("progress")
             updateCurrentStep("scan")
             DIR.emptyReadErrors()
-            const enableIgnoreList = location === "/"
             let ignoreList = []
-            if (enableIgnoreList) {
+            if (loc === "/") {
                 ignoreList = SETTINGS.getIgnoreList()
             }
-            DIR.processLocation(location, ignoreList, files => {
+            DIR.processLocation(loc, ignoreList, files => {
                 allFiles = files
                 updateCurrentStep("tree")
                 setTimeout(() => {
@@ -122,7 +120,6 @@ const resetProgressBars = () => {
         bar.classList.remove("green")
         bar.classList.remove("amber")
         bar.style.width = "100%"
-        bar.classList.add("grey")
     }
 }
 
@@ -133,19 +130,16 @@ const updateCurrentStep = (step, current, total) => {
     const squarify = document.getElementById("progress-squarify")
     const canvas = document.getElementById("progress-canvas")
     if (step === "scan") {
-        scan.classList.remove("grey")
         scan.classList.add("amber")
         text.textContent = "Scanning disk for files"
     } else if (step === "tree") {
         scan.classList.remove("amber")
         scan.classList.add("green")
-        tree.classList.remove("grey")
         tree.classList.add("amber")
         text.textContent = "Chopping files into directories"
     } else if (step === "squarify") {
         tree.classList.remove("amber")
         tree.classList.add("green")
-        squarify.classList.remove("grey")
         squarify.classList.add("amber")
         text.textContent = "Fitting files into squares"
         canvas.style.width = "0%"
@@ -154,7 +148,6 @@ const updateCurrentStep = (step, current, total) => {
         canvas.style.width = `${perc}%`
         squarify.classList.remove("amber")
         squarify.classList.add("green")
-        canvas.classList.remove("grey")
         canvas.classList.add("amber")
         text.textContent = `Adding squares to canvas: ${current}/${total}`
     } else if (step === "errors") {
@@ -177,14 +170,12 @@ const updateCounter = type => {
 }
 
 const updateStartButton = () => {
-    const location = document.getElementById("folder-path").value
-    fs.access(location, err => {
+    const loc = document.getElementById("folder-path").value
+    const {access} = require("fs")
+    access(loc, err => {
         if (err) {
-            document.getElementById("start-button").title
-                = "The selected location is unavailable"
             document.getElementById("start-button").disabled = "disabled"
         } else {
-            document.getElementById("start-button").title = ""
             document.getElementById("start-button").removeAttribute("disabled")
         }
     })
@@ -198,12 +189,14 @@ const populateDisks = () => {
     if (process.platform === "win32") {
         try {
             const wmic = "%SystemRoot%\\System32\\Wbem\\wmic.exe"
-            const output = exec(`${wmic} logicaldisk get name`).toString()
+            const {execSync} = require("child_process")
+            const output = execSync(`${wmic} logicaldisk get name`).toString()
             disks = []
             for (const d of output.split("\n").filter(l => /[A-z]:/.test(l))) {
                 const disk = `${d.trim()}\\`
                 try {
-                    fs.accessSync(disk, fs.constants.R_OK)
+                    const {accessSync, constants} = require("fs")
+                    accessSync(disk, constants.R_OK)
                     disks.push(disk)
                 } catch (e) {
                     // Disk could not be accessed
@@ -301,8 +294,9 @@ const saveTree = async () => {
     writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
-const writeToFile = (location, contents, encoding = "utf8") => {
-    fs.writeFile(location, contents, encoding, err => {
+const writeToFile = (loc, contents, encoding = "utf8") => {
+    const {writeFile} = require("fs")
+    writeFile(loc, contents, encoding, err => {
         if (err) {
             ipcRenderer.invoke("show-message-box", {
                 "title": "Error",
@@ -327,7 +321,6 @@ module.exports = {
     handleErrors,
     updateCurrentStep,
     updateCounter,
-    updateStartButton,
     getAllFiles,
     saveTree,
     writeToFile

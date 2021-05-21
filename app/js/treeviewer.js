@@ -1,28 +1,27 @@
 "use strict"
-/* globals MAIN M */
+/* globals MAIN */
 
-const fs = require("fs")
-const path = require("path")
+const {basename, dirname, join, resolve} = require("path")
 
 let readErrors = []
 
 const File = class {
-    constructor(location, size) {
-        MAIN.updateCounter("File", location)
-        this.location = location
+    constructor(loc, size) {
+        MAIN.updateCounter("File", loc)
+        this.location = loc
         this.size = size
-        this.name = path.basename(this.location)
-        this.dir = path.dirname(this.location)
+        this.name = basename(this.location)
+        this.dir = dirname(this.location)
     }
 }
 
 const Dir = class {
-    constructor(location) {
-        MAIN.updateCounter("Dir", location)
-        this.location = location
+    constructor(loc) {
+        MAIN.updateCounter("Dir", loc)
+        this.location = loc
         this.size = 0
-        this.name = path.basename(this.location) || this.location
-        this.dir = path.dirname(this.location)
+        this.name = basename(this.location) || this.location
+        this.dir = dirname(this.location)
         this.children = []
         this.subfiles = 0
         this.subfolders = 0
@@ -41,39 +40,41 @@ const Dir = class {
 
 const isDir = file => file.children
 
-const processLocation = (location, ignoreList, callback) => {
+const processLocation = (rawLoc, ignoreList, callback) => {
+    const loc = resolve(rawLoc)
     for (const p of ignoreList) {
-        if (location.startsWith(p)) {
-            callback(new File(location, 0))
+        if (loc.startsWith(p)) {
+            callback(new File(loc, 0))
             return
         }
     }
-    fs.access(location, e => {
+    const {access, lstat, readdir} = require("fs")
+    access(loc, e => {
         if (e) {
             readErrors.push(
-                `${location} could not be found, but was listed in the folder`)
-            callback(new File(location, 0))
+                `${loc} could not be found, but was listed in the folder`)
+            callback(new File(loc, 0))
             return
         }
-        fs.lstat(location, (er, stats) => {
+        lstat(loc, (er, stats) => {
             if (er) {
                 readErrors.push(
-                    `${location} does not allow statistics reading: ${er}`)
-                callback(new File(location, 0))
+                    `${loc} does not allow statistics reading: ${er}`)
+                callback(new File(loc, 0))
                 return
             }
             if (stats.isDirectory()) {
-                fs.readdir(location, (err, files) => {
+                readdir(loc, (err, files) => {
                     if (err) {
                         readErrors.push(
-                            `${location} does not allow folder listing: ${err}`)
-                        callback(new Dir(location))
+                            `${loc} does not allow folder listing: ${err}`)
+                        callback(new Dir(loc))
                         return
                     }
-                    const dir = new Dir(location)
+                    const dir = new Dir(loc)
                     let callbacksReceived = 0
                     for (const f of files) {
-                        const combinedPath = path.join(location, f)
+                        const combinedPath = join(loc, f)
                         processLocation(combinedPath, ignoreList, subpath => {
                             dir.add(subpath)
                             callbacksReceived += 1
@@ -87,7 +88,7 @@ const processLocation = (location, ignoreList, callback) => {
                     }
                 })
             } else {
-                callback(new File(location, stats.size))
+                callback(new File(loc, stats.size))
             }
         })
     })
@@ -103,38 +104,39 @@ const prettySize = size => {
 
 const fillTree = allFiles => {
     const tree = document.getElementById("directories")
-    let treeContents = `<div style="display: flex;">
-            <span class="truncate" id="directory-title">
-            ${allFiles.name} - ${prettySize(allFiles.size)} containing
-            ${allFiles.subfiles} files and ${allFiles.subfolders} folders</span>
-            <button class="btn" onclick="MAIN.saveTree()">Export tree</button>
-        </div><span class="truncate">${allFiles.location}</span>
-        <ul class="collapsible">`
-    let complete = true
+    tree.innerHTML = ""
+    const head = document.createElement("div")
+    head.style.display = "flex"
+    const title = document.createElement("span")
+    title.className = "truncate"
+    title.id = "directory-title"
+    title.textContent = `${allFiles.name} - ${prettySize(allFiles.size)}
+    containing ${allFiles.subfiles} files and ${allFiles.subfolders} folders`
+    head.appendChild(title)
+    if (allFiles.children.length === 0) {
+        tree.appendChild(document.createTextNode(
+            "This directory is completely empty"))
+        return
+    }
+    const exportBtn = document.createElement("button")
+    exportBtn.className = "btn"
+    exportBtn.textContent = "Save tree"
+    exportBtn.addEventListener("click", () => MAIN.saveTree())
+    head.appendChild(exportBtn)
+    tree.appendChild(head)
+    const rootLocation = document.createElement("span")
+    rootLocation.className = "truncate"
+    rootLocation.textContent = allFiles.location
+    tree.appendChild(rootLocation)
+    const ul = document.createElement("ul")
     for (const f of allFiles.children.sort(compareSizes).reverse()) {
-        try {
-            if (isDir(f)) {
-                treeContents += dirInTree(f, allFiles.size)
-            } else {
-                treeContents += fileInTree(f, allFiles.size)
-            }
-        } catch (e) {
-            // RangeError: String length limit reached
-            complete = false
-            break
+        if (isDir(f)) {
+            ul.appendChild(dirInTree(f, allFiles.size))
+        } else {
+            ul.appendChild(fileInTree(f, allFiles.size))
         }
     }
-    if (allFiles.children.length === 0) {
-        treeContents += "This directory is completely empty"
-    }
-    tree.innerHTML = `${treeContents}</ul>`
-    if (!complete) {
-        document.querySelector("#directories button").disabled = true
-        tree.innerHTML += "<h6>Only a selection of directories are listed here,"
-            + " because of the javascript string length limitation. "
-            + "Use the visual tab to see all files.</h6>"
-    }
-    M.Collapsible.init(document.querySelectorAll(".collapsible"))
+    tree.appendChild(ul)
 }
 
 const compareSizes = (a, b) => {
@@ -145,52 +147,89 @@ const compareSizes = (a, b) => {
 }
 
 const dirInTree = (f, dirSize) => {
-    let contents = `<li><div class="collapsible-header"
-        title="${f.size / dirSize * 100 || 0}%">${progressbar(f.size, dirSize)}
-            <span class="truncate" style="width: 40%;">${f.name}</span>
-            <span class="truncate" style="width: 20%;">
-                ${prettySize(f.size)}</span>
-            <span class="truncate" style="width: 20%;">
-                ${f.subfiles} files</span>
-            <span class="truncate" style="width: 20%;">
-                ${f.subfolders} folders</span>
-        </div>`
+    const el = document.createElement("li")
+    el.className = "dir"
+    // HEAD
+    const head = document.createElement("div")
+    head.addEventListener("click", () => {
+        if (head.nextSibling.style.display === "none") {
+            head.nextSibling.style.display = "inline"
+        } else {
+            head.nextSibling.style.display = "none"
+        }
+    })
+    head.className = "collapsible-header"
+    el.appendChild(head)
+    head.appendChild(progressbar(f.size, dirSize))
+    const name = document.createElement("span")
+    name.className = "truncate"
+    name.style.width = "40%"
+    name.textContent = f.name
+    head.appendChild(name)
+    const size = document.createElement("span")
+    size.className = "truncate"
+    size.style.width = "20%"
+    size.textContent = prettySize(f.size)
+    head.appendChild(size)
+    const subfiles = document.createElement("span")
+    subfiles.className = "truncate"
+    subfiles.style.width = "20%"
+    subfiles.textContent = `${f.subfiles} files`
+    head.appendChild(subfiles)
+    const subfolders = document.createElement("span")
+    subfolders.className = "truncate"
+    subfolders.style.width = "20%"
+    subfolders.textContent = `${f.subfolders} folders`
+    head.appendChild(subfolders)
+    // BODY
+    const body = document.createElement("div")
+    body.style.display = "none"
+    body.className = "collapsible-body"
     if (f.children.length > 0) {
-        contents += `<div class="collapsible-body"><div class="row">`
-        contents += `<div class="col s12 m12"><ul class="collapsible">`
+        const ul = document.createElement("ul")
         for (const sub of f.children.sort(compareSizes).reverse()) {
-            try {
-                if (isDir(sub)) {
-                    contents += dirInTree(sub, f.size)
-                } else {
-                    contents += fileInTree(sub, f.size)
-                }
-            } catch (e) {
-                // RangeError: String length limit reached
-                break
+            if (isDir(sub)) {
+                ul.appendChild(dirInTree(sub, f.size))
+            } else {
+                ul.appendChild(fileInTree(sub, f.size))
             }
         }
-        contents += "</ul></div></div></div></li>"
+        body.appendChild(ul)
     } else {
-        contents += `<div class="collapsible-body">
-            This directory is completely empty</div></li>`
+        body.textContent = "This directory is completely empty"
     }
-    return contents
+    el.appendChild(body)
+    return el
 }
 
-const fileInTree = (f, dirSize) => `<li><div class="collection-item"
-        title="${f.size / dirSize * 100 || 0}%">${progressbar(f.size, dirSize)}
-            <span class="truncate" style="width: 80%;">${f.name}</span>
-            <span class="truncate" style="width: 20%;">
-                ${prettySize(f.size)}</span>
-            </div>
-        </li>`
+const fileInTree = (f, dirSize) => {
+    const li = document.createElement("li")
+    li.className = "file"
+    li.appendChild(progressbar(f.size, dirSize))
+    const name = document.createElement("span")
+    name.className = "truncate"
+    name.style.width = "80%"
+    name.textContent = f.name
+    li.appendChild(name)
+    const size = document.createElement("span")
+    size.className = "truncate"
+    size.style.width = "20%"
+    size.textContent = prettySize(f.size)
+    li.appendChild(size)
+    return li
+}
 
-const progressbar = (current, max) => `<div class="progress"
-    style="height: 10px;"><div class="progres-bar"
-        style="background-color: ${progressColor(current / max * 100)};
-        height: 10px;width: ${current / max * 100 || 0}%;" role="progressbar">
-    </div></div>`
+const progressbar = (current, max) => {
+    const progress = document.createElement("div")
+    progress.className = "progress"
+    const bar = document.createElement("bar")
+    const perc = current / max * 100 || 0
+    progress.title = `${perc}%`
+    bar.style.width = `${perc}%`
+    bar.style.backgroundColor = progressColor(perc)
+    progress.appendChild(bar)
+    return progress
+}
 
 const progressColor = perc => {
     const bright = (50 - Math.floor(Math.abs(perc - 50))) * 2

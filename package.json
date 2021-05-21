@@ -1,6 +1,6 @@
 {
   "name": "crossdirstat",
-  "version": "1.5.0",
+  "version": "2.0.0-dev",
   "description": "Free open-source cross-platform file & directory statistics",
   "main": "app/index.js",
   "scripts": {
@@ -15,7 +15,6 @@
   "homepage": "https://github.com/jelmerro/crossdirstat",
   "keywords": [
     "Electron",
-    "Materialize",
     "Directory",
     "Statistics"
   ],
@@ -23,13 +22,12 @@
   "email": "Jelmerro@users.noreply.github.com",
   "license": "MIT",
   "devDependencies": {
-    "archiver": "^5.0.2",
-    "electron": "^10.1.5",
-    "electron-builder": "^22.9.1",
-    "eslint": "^7.13.0"
+    "archiver": "5.3.0",
+    "electron": "13.0.0-beta.28",
+    "electron-builder": "22.10.5",
+    "eslint": "7.26.0"
   },
   "dependencies": {
-    "materialize-css": "^1.0.0",
-    "squarify": "^1.1.0"
+    "squarify": "1.1.0"
   }
 }

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="../node_modules/materialize-css/dist/css/materialize.min.css" rel="stylesheet">
     <link href="main.css" rel="stylesheet" type="text/css">
     <meta http-equiv="Content-Security-Policy" content="font-src file://*; img-src file://* data:; object-src 'none'; style-src 'unsafe-inline' file://*; script-src 'unsafe-inline' file://*; default-src 'none'">
 </head>
@@ -13,7 +12,7 @@
         <span class="menu-item" id="menu-visual">Visual</span>
         <button class="btn white-text red close-button">X</button>
     </nav>
-    <main class="container-fluid">
+    <main>
         <div id="progress" style="display: none;">
             <img src="icons/1024x1024.png" id="spinner">
             <div style="display: flex;margin-bottom: 0;">
@@ -24,37 +23,37 @@
             </div>
             <div style="display: flex;">
                 <span class="progress">
-                    <div class="determinate accent-3 grey lighten-3" id="progress-scan"></div>
+                    <div id="progress-scan"></div>
                 </span>
                 <span class="progress">
-                    <div class="determinate accent-3 grey lighten-3" id="progress-tree"></div>
+                    <div id="progress-tree"></div>
                 </span>
                 <span class="progress">
-                    <div class="determinate accent-3 grey lighten-3" id="progress-squarify"></div>
+                    <div id="progress-squarify"></div>
                 </span>
                 <span class="progress">
-                    <div class="determinate accent-3 grey lighten-3" id="progress-canvas"></div>
+                    <div id="progress-canvas"></div>
                 </span>
             </div>
             <div id="progress-text"></div>
         </div>
         <div id="start">
-            <div class="row" id="welcome">
+            <div id="welcome">
                 <img src="icons/1024x1024.png">
                 <span>Welcome to crossdirstat</span>
             </div>
-            <div class="row">
+            <div>
                 <div id="custom-folder">
-                    <h4>Scan a custom folder</h4>
+                    <h2>Scan a custom folder</h2>
                     <input id="folder-path" type="text" placeholder="Folder location"></input>
                     <button id="start-button" class="btn" disabled>Scan folder</button>
                     <button id="pick-button" class="btn">Browse</button>
                 </div>
                 <div id="pre-configured-folders">
-                    <h4>Scan an entire disk</h4>
+                    <h2>Scan an entire disk</h2>
                 </div>
             </div>
-            <div class="row">
+            <div>
                 crossdirstat is an easy directory statistics program,
                 which is available for a wide range of operating systems.
                 It is created by <span class="link" id="link-me">Jelmer van Arnhem</span>
@@ -63,9 +62,7 @@
                 Version <span id="version"></span> is currently running,
                 see the <span class="link" id="link-releases">release page</span> for new versions.
             </div>
-            <div class="row">
-                <div id="read-errors"></div>
-            </div>
+            <div id="read-errors"></div>
         </div>
         <div id="directories" style="display: none;">
             <span style="text-align: center;display: block;">
@@ -84,6 +81,5 @@
             </div>
         </div>
     </main>
-    <script src="../node_modules/materialize-css/dist/js/materialize.js"></script>
 </body>
 </html>

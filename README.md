@@ -52,5 +52,4 @@ crossdirstat was made by [Jelmer van Arnhem](https://github.com/Jelmerro) and is
 This project makes use of the following libraries:
 
 - [Electron](https://github.com/electron/electron) (MIT @ GitHub Inc.)
-- [Materialize](https://github.com/Dogfalo/materialize/) (MIT @ Materialize)
 - [squarify](https://github.com/huy-nguyen/squarify) (MIT @ Huy Nguyen)
