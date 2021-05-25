@@ -25,7 +25,7 @@ const generate = () => {
     const {"default": squarify} = require("squarify")
     setTimeout(() => {
         squares = squarify(processedFiles.children, {
-            "x0": 0, "y0": 0, "x1": 10000, "y1": 10000
+            "x0": 0, "x1": 10000, "y0": 0, "y1": 10000
         })
         setTimeout(parseSquares, 30)
     }, 30)
@@ -159,16 +159,16 @@ const processNode = node => {
         node.type = filetype(node)
         return node
     }
-    for (const num in node.children) {
-        node.children[num] = processNode(node.children[num])
-    }
+    node.children.forEach((child, index) => {
+        node.children[index] = processNode(child)
+    })
     return node
 }
 
 const filetype = f => {
-    let type = /^.+\.([^.]+)$/.exec(f.name)
+    let type = (/^.+\.([^.]+)$/).exec(f.name)
     if (type) {
-        type = type[1]
+        [, type] = type
     } else {
         type = "none"
     }
@@ -194,7 +194,7 @@ const saveImage = () => {
     buttons.push("Cancel")
     const {ipcRenderer} = require("electron")
     ipcRenderer.invoke("show-message-box", {
-        "type": "question", "title": "Export type", buttons, message
+        buttons, message, "title": "Export type", "type": "question"
     }).then(response => {
         if (response === 0) {
             saveSVG()
@@ -206,13 +206,13 @@ const saveImage = () => {
     })
 }
 
-const saveSVG = async () => {
+const saveSVG = async() => {
     const {ipcRenderer} = require("electron")
     const filename = await ipcRenderer.invoke("show-save-dialog", {
-        "title": "Select the save location",
         "filters": [{
-            "name": "Scalable Vector Graphics file", "extensions": ["svg"]
-        }]
+            "extensions": ["svg"], "name": "Scalable Vector Graphics file"
+        }],
+        "title": "Select the save location"
     })
     if (!filename) {
         return
@@ -239,13 +239,13 @@ const saveSVG = async () => {
     MAIN.writeToFile(filename, body)
 }
 
-const savePNG = async () => {
+const savePNG = async() => {
     const {ipcRenderer} = require("electron")
     const filename = await ipcRenderer.invoke("show-save-dialog", {
-        "title": "Select the save location",
         "filters": [{
-            "name": "Portable Network Graphics file", "extensions": ["png"]
-        }]
+            "extensions": ["png"], "name": "Portable Network Graphics file"
+        }],
+        "title": "Select the save location"
     })
     if (!filename) {
         return
@@ -255,23 +255,23 @@ const savePNG = async () => {
     MAIN.writeToFile(filename, imageData, "base64")
 }
 
-const saveJSON = async () => {
+const saveJSON = async() => {
     const {ipcRenderer} = require("electron")
     const filename = await ipcRenderer.invoke("show-save-dialog", {
-        "title": "Select the save location",
         "filters": [{
-            "name": "JavaScript Object Notation file", "extensions": ["json"]
-        }]
+            "extensions": ["json"], "name": "JavaScript Object Notation file"
+        }],
+        "title": "Select the save location"
     })
     if (!filename) {
         return
     }
     const json = {
-        "squares": squares,
         "colors": SETTINGS.getSelectedColors(),
-        "filetypes": getFiletypesBySize()
+        "filetypes": getFiletypesBySize(),
+        squares
     }
     MAIN.writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
-module.exports = {generate, setFilenameOnHover, saveImage}
+module.exports = {generate, saveImage, setFilenameOnHover}

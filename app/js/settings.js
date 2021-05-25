@@ -18,7 +18,7 @@ const defaultColor = "#777777"
 
 const disks = []
 
-const getSelectedColors = () => ({"filetypes": colors, "default": defaultColor})
+const getSelectedColors = () => ({"default": defaultColor, "filetypes": colors})
 
 const getUnixVolumes = () => {
     if (disks.length !== 0) {
@@ -68,5 +68,5 @@ const toggleVisualConfig = () => {
 }
 
 module.exports = {
-    getSelectedColors, getIgnoreList, getUnixVolumes, toggleVisualConfig
+    getIgnoreList, getSelectedColors, getUnixVolumes, toggleVisualConfig
 }

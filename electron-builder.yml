@@ -13,10 +13,6 @@ linux:
       arch:
         - x64
         - arm64
-    - target: freebsd
-      arch:
-        - x64
-        - arm64
     - target: pacman
       arch:
         - x64
@@ -45,6 +41,7 @@ mac:
     - target: zip
       arch:
         - x64
+        - arm64
 win:
   icon: app/icons/512x512.png
   legalTrademarks: Copyright @ Jelmer van Arnhem | Licensed as free software (MIT)
@@ -57,12 +54,14 @@ win:
         - x64
     - target: zip
       arch:
+        - x64
         - arm64
   extraFiles:
     - filter:
         - README.md
         - LICENSE
 nsis:
+  differentialPackage: false
   oneClick: false
   license: LICENSE
 copyright: Copyright @ Jelmer van Arnhem | Licensed as free software (MIT)

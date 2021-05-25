@@ -7,18 +7,18 @@ app.on("ready", () => {
     const {width, height} = screen.getPrimaryDisplay().workAreaSize
     const {join} = require("path")
     mainWindow = new BrowserWindow({
-        "title": "crossdirstat",
-        "width": Math.floor(width / 1.5),
+        "frame": false,
         "height": Math.floor(height / 1.33),
         "icon": join(__dirname, "icons/1024x1024.png"),
-        "frame": false,
+        "title": "crossdirstat",
         "webPreferences": {
-            "preload": join(__dirname, "apploader.js"),
-            "sandbox": false,
             "contextIsolation": true,
+            "enableRemoteModule": false,
             "nodeIntegration": false,
-            "enableRemoteModule": false
-        }
+            "preload": join(__dirname, "apploader.js"),
+            "sandbox": false
+        },
+        "width": Math.floor(width / 1.5)
     })
     mainWindow.setMinimumSize(750, 750)
     mainWindow.loadURL(`file://${join(__dirname, "index.html")}`)

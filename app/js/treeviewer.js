@@ -26,6 +26,7 @@ const Dir = class {
         this.subfiles = 0
         this.subfolders = 0
     }
+
     add(file) {
         this.children.push(file)
         this.size += file.size
@@ -99,7 +100,7 @@ const prettySize = size => {
         return `${size} B`
     }
     const exp = Math.floor(Math.log(size) / Math.log(1024))
-    return `${(size / Math.pow(1024, exp)).toFixed(2)} ${"KMGTPE"[exp - 1]}B`
+    return `${(size / 1024 ** exp).toFixed(2)} ${"KMGTPE"[exp - 1]}B`
 }
 
 const fillTree = allFiles => {
@@ -246,5 +247,5 @@ const emptyReadErrors = () => {
 const getReadErrors = () => readErrors
 
 module.exports = {
-    processLocation, fillTree, prettySize, emptyReadErrors, getReadErrors
+    emptyReadErrors, fillTree, getReadErrors, prettySize, processLocation
 }

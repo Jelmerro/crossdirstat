@@ -49,14 +49,14 @@ const init = () => {
     })
 }
 
-const pickFolder = async () => {
+const pickFolder = async() => {
     const folders = await ipcRenderer.invoke("show-open-dialog", {
-        "title": "Select a folder", "properties": ["openDirectory"]
+        "properties": ["openDirectory"], "title": "Select a folder"
     })
     if (!folders || !folders.length) {
         return
     }
-    document.getElementById("folder-path").value = folders[0]
+    [document.getElementById("folder-path").value] = folders
     updateStartButton()
 }
 
@@ -206,7 +206,8 @@ const populateDisks = () => {
             const {execSync} = require("child_process")
             const output = execSync(`${wmic} logicaldisk get name`).toString()
             disks = []
-            for (const d of output.split("\n").filter(l => /[A-z]:/.test(l))) {
+            const lines = output.split("\n")
+            for (const d of lines.filter(l => (/[A-z]:/).test(l))) {
                 const disk = `${d.trim()}\\`
                 try {
                     const {accessSync, constants} = require("fs")
@@ -255,18 +256,18 @@ const goAllDisks = () => {
     updateCurrentStep("scan")
     DIR.emptyReadErrors()
     allFiles = {
-        "size": 0,
-        "name": "All disks",
-        "location": "All disks",
-        "children": [],
-        "subfiles": 0,
-        "subfolders": 0,
         "add": disk => {
             allFiles.children.push(disk)
             allFiles.size += disk.size
             allFiles.subfiles += disk.subfiles
             allFiles.subfolders += disk.subfolders + 1
-        }
+        },
+        "children": [],
+        "location": "All disks",
+        "name": "All disks",
+        "size": 0,
+        "subfiles": 0,
+        "subfolders": 0
     }
     processDisk(allDisks[0])
 }
@@ -294,17 +295,17 @@ const processDisk = disk => {
     }, 0)
 }
 
-const saveTree = async () => {
+const saveTree = async() => {
     const filename = await ipcRenderer.invoke("show-save-dialog", {
-        "title": "Select the save location",
         "filters": [{
-            "name": "JavaScript Object Notation file", "extensions": ["json"]
-        }]
+            "extensions": ["json"], "name": "JavaScript Object Notation file"
+        }],
+        "title": "Select the save location"
     })
     if (!filename) {
         return
     }
-    const json = {"files": allFiles, "errors": DIR.getReadErrors()}
+    const json = {"errors": DIR.getReadErrors(), "files": allFiles}
     writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
@@ -313,29 +314,29 @@ const writeToFile = (loc, contents, encoding = "utf8") => {
     writeFile(loc, contents, encoding, err => {
         if (err) {
             ipcRenderer.invoke("show-message-box", {
-                "title": "Error",
-                "type": "error",
                 "buttons": ["Ok"],
+                "detail": err.toString(),
                 "message": "Could not save file",
-                "detail": err.toString()
+                "title": "Error",
+                "type": "error"
             })
         } else {
             ipcRenderer.invoke("show-message-box", {
-                "title": "Success",
-                "type": "info",
                 "buttons": ["Ok"],
-                "message": "File saved successfully"
+                "message": "File saved successfully",
+                "title": "Success",
+                "type": "info"
             })
         }
     })
 }
 
 module.exports = {
-    init,
-    handleErrors,
-    updateCurrentStep,
-    updateCounter,
     getAllFiles,
+    handleErrors,
+    init,
     saveTree,
+    updateCounter,
+    updateCurrentStep,
     writeToFile
 }
