@@ -1,6 +1,7 @@
 {
   "name": "crossdirstat",
-  "version": "2.0.0",
+  "productName": "Crossdirstat",
+  "version": "2.1.0-dev",
   "description": "Free open-source cross-platform file & directory statistics",
   "main": "app/index.js",
   "scripts": {
@@ -9,7 +10,9 @@
     "buildall": "node build.js --linux --win --mac",
     "buildlinux": "node build.js --linux",
     "buildwin": "node build.js --win",
-    "buildmac": "node build.js --mac"
+    "buildmac": "node build.js --mac",
+    "fix": "eslint --fix app .eslintrc.js build.js",
+    "lint": "eslint app .eslintrc.js build.js"
   },
   "repository": "https://github.com/jelmerro/crossdirstat",
   "homepage": "https://github.com/jelmerro/crossdirstat",
@@ -23,9 +26,9 @@
   "license": "MIT",
   "devDependencies": {
     "archiver": "5.3.0",
-    "electron": "13.0.0",
-    "electron-builder": "22.10.5",
-    "eslint": "7.27.0"
+    "electron": "13.1.7",
+    "electron-builder": "22.11.7",
+    "eslint": "7.32.0"
   },
   "dependencies": {
     "squarify": "1.1.0"

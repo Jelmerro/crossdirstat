@@ -1,4 +1,5 @@
 appId: com.github.Jelmerro.crossdirstat
+productName: Crossdirstat
 linux:
   icon: app/icons
   executableName: crossdirstat
