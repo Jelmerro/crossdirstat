@@ -12,11 +12,7 @@ app.on("ready", () => {
         "icon": join(__dirname, "icons/1024x1024.png"),
         "title": "crossdirstat",
         "webPreferences": {
-            "contextIsolation": true,
-            "enableRemoteModule": false,
-            "nodeIntegration": false,
-            "preload": join(__dirname, "apploader.js"),
-            "sandbox": false
+            "preload": join(__dirname, "apploader.js"), "sandbox": false
         },
         "width": Math.floor(width / 1.5)
     })
