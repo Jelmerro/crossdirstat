@@ -1,7 +1,7 @@
 {
   "name": "crossdirstat",
   "productName": "Crossdirstat",
-  "version": "2.1.0-dev",
+  "version": "2.1.0",
   "description": "Free open-source cross-platform file & directory statistics",
   "main": "app/index.js",
   "scripts": {
