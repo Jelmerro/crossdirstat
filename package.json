@@ -1,7 +1,7 @@
 {
   "name": "crossdirstat",
   "productName": "Crossdirstat",
-  "version": "2.1.1",
+  "version": "2.2.0-dev",
   "description": "Free open-source cross-platform file & directory statistics",
   "main": "app/index.js",
   "scripts": {
@@ -25,9 +25,9 @@
   "email": "Jelmerro@users.noreply.github.com",
   "license": "MIT",
   "devDependencies": {
-    "electron": "17.0.0",
-    "electron-builder": "22.14.13",
-    "eslint": "8.8.0"
+    "electron": "18.1.0",
+    "electron-builder": "23.0.3",
+    "eslint": "8.14.0"
   },
   "dependencies": {
     "squarify": "1.1.0"
