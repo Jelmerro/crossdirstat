@@ -34,7 +34,9 @@ const init = () => {
     document.getElementById("square-view").addEventListener(
         "mousemove", VISUAL.setFilenameOnHover)
     window.addEventListener("keydown", e => {
-        if (e.key === "Enter") {
+        if (e.key === "F12") {
+            ipcRenderer.invoke("toggle-devtools")
+        } else if (e.key === "Enter") {
             if (e.target === document.getElementById("folder-path")) {
                 const {access} = require("fs")
                 access(e.target.value, err => {
