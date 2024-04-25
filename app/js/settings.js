@@ -13,9 +13,7 @@ const colors = [
     "#ffeb3b",
     "#ff9800"
 ]
-
 const defaultColor = "#777777"
-
 const disks = []
 
 const getSelectedColors = () => ({"default": defaultColor, "filetypes": colors})

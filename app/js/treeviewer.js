@@ -4,7 +4,6 @@
 const {basename, dirname, join, resolve} = require("path")
 
 let readErrors = []
-
 const File = class {
     constructor(loc, size) {
         MAIN.updateCounter("File", loc)
@@ -14,7 +13,6 @@ const File = class {
         this.dir = dirname(this.location)
     }
 }
-
 const Dir = class {
     constructor(loc) {
         MAIN.updateCounter("Dir", loc)

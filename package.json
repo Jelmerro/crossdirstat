@@ -1,13 +1,13 @@
 {
   "name": "crossdirstat",
   "productName": "Crossdirstat",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Free open-source cross-platform file & directory statistics",
   "main": "app/index.js",
   "scripts": {
     "start": "electron app",
-    "fix": "eslint --fix app .eslintrc.js build.js",
-    "lint": "eslint app .eslintrc.js build.js"
+    "fix": "eslint --fix app build.js",
+    "lint": "eslint app build.js"
   },
   "repository": "https://github.com/jelmerro/crossdirstat",
   "homepage": "https://github.com/jelmerro/crossdirstat",
@@ -23,7 +23,7 @@
   "devDependencies": {
     "electron": "30.0.1",
     "electron-builder": "24.13.3",
-    "eslint": "9.1.1"
+    "eslint-config": "github:Jelmerro/eslint-config"
   },
   "dependencies": {
     "squarify": "1.1.0"

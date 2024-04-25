@@ -2,7 +2,6 @@
 
 const {app, BrowserWindow, dialog, ipcMain, screen} = require("electron")
 let mainWindow = null
-
 app.on("ready", () => {
     const {width, height} = screen.getPrimaryDisplay().workAreaSize
     const {join} = require("path")
@@ -24,7 +23,6 @@ app.on("ready", () => {
             `document.getElementById("version").textContent = "${version}"`)
     })
 })
-
 // Main tasks called from the renderer
 ipcMain.handle("quit-app", () => mainWindow.close())
 ipcMain.handle("show-open-dialog", (_, options) => dialog
