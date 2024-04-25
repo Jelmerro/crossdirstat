@@ -5,6 +5,10 @@ crossdirstat
 
 Free open-source cross-platform file & directory statistics as found on [Github](https://github.com/Jelmerro/crossdirstat)
 
+I have personally replaced crossdirstat with ncdu for the most part,
+so major features are not planned, but I will update the Electron version occasionally.
+See below for features, installation and why I made crossdirstat all those years ago.
+
 ## Features
 
 - Generate a directory tree for any given folder
@@ -16,20 +20,17 @@ Free open-source cross-platform file & directory statistics as found on [Github]
 
 ## Installation
 
-There are a couple of options for installing or running crossdirstat.
-The 2nd and 3rd mentioned give you the option to modify and check the source code.
-
 ### Easy download
 
 Download a stable installer or executable for your platform from the [github releases page](https://github.com/Jelmerro/crossdirstat/releases).
 
 ### Run directly
 
-Clone or download the latest source and run `npm install` and `npm start`.
+Clone/download the latest source and run `npm install` and `npm start`.
 
 ### Make your own build
 
-Clone or download the latest source and create your own build with `npm run build`, see package.json for platform-specific commands.
+Create your own build with `node build`, see `node build --help` for other options.
 
 ## Why another *dirstat application?
 

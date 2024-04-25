@@ -15,7 +15,6 @@ const ebuilder = {"config": {
         })
     }
 }}
-rmSync("dist/", {"force": true, "recursive": true})
 process.argv.slice(1).forEach(a => {
     if (a === "--help") {
         console.info("Basic crossdirstat build script, these are its options:")
@@ -33,4 +32,5 @@ process.argv.slice(1).forEach(a => {
         ebuilder.mac = []
     }
 })
+rmSync("dist/", {"force": true, "recursive": true})
 builder.build(ebuilder).then(e => console.info(e)).catch(e => console.error(e))
