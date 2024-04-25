@@ -5,6 +5,9 @@ linux:
   executableName: crossdirstat
   category: Office;Utility;
   maintainer: Jelmer van Arnhem
+  publish:
+  executableArgs:
+    - --ozone-platform-hint=auto
   target:
     - target: AppImage
       arch:
@@ -32,8 +35,15 @@ linux:
 rpm:
   fpm:
     - --rpm-rpmbuild-define=_build_id_links none
+    - --after-upgrade=./after-install.sh
+  afterInstall: ./after-install.sh
+deb:
+  fpm:
+    - --after-upgrade=./after-install.sh
+  afterInstall: ./after-install.sh
 mac:
   icon: app/icons
+  publish:
   target:
     - target: zip
       arch:
@@ -42,6 +52,7 @@ mac:
 win:
   icon: app/icons/512x512.png
   legalTrademarks: Copyright @ Jelmer van Arnhem | Licensed as free software (MIT)
+  publish:
   target:
     - target: nsis
       arch:
