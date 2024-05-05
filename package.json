@@ -7,7 +7,8 @@
   "scripts": {
     "start": "electron app",
     "fix": "eslint --fix app build.js",
-    "lint": "eslint app build.js"
+    "lint": "eslint app build.js",
+    "update": "npx -y jelmerro/nus"
   },
   "repository": "https://github.com/jelmerro/crossdirstat",
   "homepage": "https://github.com/jelmerro/crossdirstat",
@@ -21,7 +22,7 @@
   "funding": "https://github.com/sponsors/Jelmerro/",
   "license": "MIT",
   "devDependencies": {
-    "electron": "30.0.1",
+    "electron": "30.0.2",
     "electron-builder": "24.13.3",
     "eslint-config": "github:Jelmerro/eslint-config"
   },
