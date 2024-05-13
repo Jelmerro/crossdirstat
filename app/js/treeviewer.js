@@ -3,6 +3,8 @@
 
 const {basename, dirname, join, resolve} = require("path")
 
+const isDir = file => file.children
+
 let readErrors = []
 const File = class {
     constructor(loc, size) {
@@ -36,8 +38,6 @@ const Dir = class {
         }
     }
 }
-
-const isDir = file => file.children
 
 const processLocation = (rawLoc, ignoreList, callback) => {
     const loc = resolve(rawLoc)
@@ -93,6 +93,32 @@ const processLocation = (rawLoc, ignoreList, callback) => {
     })
 }
 
+const progressColor = perc => {
+    const bright = (50 - Math.floor(Math.abs(perc - 50))) * 2
+    const red = Math.min(
+        255, Math.max(17, Math.floor(255 - perc * 2.4)) + bright)
+    const green = Math.min(255, Math.max(17, Math.floor(perc * 2.4)) + bright)
+    return `#${red.toString(16)}${green.toString(16)}00`
+}
+
+const progressbar = (current, max) => {
+    const progress = document.createElement("div")
+    progress.className = "progress"
+    const bar = document.createElement("bar")
+    const perc = current / max * 100 || 0
+    progress.title = `${perc}%`
+    bar.style.width = `${perc}%`
+    bar.style.backgroundColor = progressColor(perc)
+    progress.appendChild(bar)
+    return progress
+}
+
+const emptyReadErrors = () => {
+    readErrors = []
+}
+
+const getReadErrors = () => readErrors
+
 const prettySize = size => {
     if (size < 1024) {
         return `${size} B`
@@ -101,41 +127,21 @@ const prettySize = size => {
     return `${(size / 1024 ** exp).toFixed(2)} ${"KMGTPE"[exp - 1]}B`
 }
 
-const fillTree = allFiles => {
-    const tree = document.getElementById("directories")
-    tree.innerHTML = ""
-    const head = document.createElement("div")
-    head.style.display = "flex"
-    const title = document.createElement("span")
-    title.className = "truncate"
-    title.id = "directory-title"
-    title.textContent = `${allFiles.name} - ${prettySize(allFiles.size)}
-    containing ${allFiles.subfiles} files and ${allFiles.subfolders} folders`
-    head.appendChild(title)
-    if (allFiles.children.length === 0) {
-        tree.appendChild(document.createTextNode(
-            "This directory is completely empty"))
-        return
-    }
-    const exportBtn = document.createElement("button")
-    exportBtn.className = "btn"
-    exportBtn.textContent = "Save tree"
-    exportBtn.addEventListener("click", () => MAIN.saveTree())
-    head.appendChild(exportBtn)
-    tree.appendChild(head)
-    const rootLocation = document.createElement("span")
-    rootLocation.className = "truncate"
-    rootLocation.textContent = allFiles.location
-    tree.appendChild(rootLocation)
-    const ul = document.createElement("ul")
-    for (const f of allFiles.children.sort(compareSizes).reverse()) {
-        if (isDir(f)) {
-            ul.appendChild(dirInTree(f, allFiles.size))
-        } else {
-            ul.appendChild(fileInTree(f, allFiles.size))
-        }
-    }
-    tree.appendChild(ul)
+const fileInTree = (f, dirSize) => {
+    const li = document.createElement("li")
+    li.className = "file"
+    li.appendChild(progressbar(f.size, dirSize))
+    const name = document.createElement("span")
+    name.className = "truncate"
+    name.style.width = "80%"
+    name.textContent = f.name
+    li.appendChild(name)
+    const size = document.createElement("span")
+    size.className = "truncate"
+    size.style.width = "20%"
+    size.textContent = prettySize(f.size)
+    li.appendChild(size)
+    return li
 }
 
 const compareSizes = (a, b) => {
@@ -201,48 +207,42 @@ const dirInTree = (f, dirSize) => {
     return el
 }
 
-const fileInTree = (f, dirSize) => {
-    const li = document.createElement("li")
-    li.className = "file"
-    li.appendChild(progressbar(f.size, dirSize))
-    const name = document.createElement("span")
-    name.className = "truncate"
-    name.style.width = "80%"
-    name.textContent = f.name
-    li.appendChild(name)
-    const size = document.createElement("span")
-    size.className = "truncate"
-    size.style.width = "20%"
-    size.textContent = prettySize(f.size)
-    li.appendChild(size)
-    return li
+const fillTree = allFiles => {
+    const tree = document.getElementById("directories")
+    tree.innerHTML = ""
+    const head = document.createElement("div")
+    head.style.display = "flex"
+    const title = document.createElement("span")
+    title.className = "truncate"
+    title.id = "directory-title"
+    title.textContent = `${allFiles.name} - ${prettySize(allFiles.size)}
+    containing ${allFiles.subfiles} files and ${allFiles.subfolders} folders`
+    head.appendChild(title)
+    if (allFiles.children.length === 0) {
+        tree.appendChild(document.createTextNode(
+            "This directory is completely empty"))
+        return
+    }
+    const exportBtn = document.createElement("button")
+    exportBtn.className = "btn"
+    exportBtn.textContent = "Save tree"
+    exportBtn.addEventListener("click", () => MAIN.saveTree())
+    head.appendChild(exportBtn)
+    tree.appendChild(head)
+    const rootLocation = document.createElement("span")
+    rootLocation.className = "truncate"
+    rootLocation.textContent = allFiles.location
+    tree.appendChild(rootLocation)
+    const ul = document.createElement("ul")
+    for (const f of allFiles.children.sort(compareSizes).reverse()) {
+        if (isDir(f)) {
+            ul.appendChild(dirInTree(f, allFiles.size))
+        } else {
+            ul.appendChild(fileInTree(f, allFiles.size))
+        }
+    }
+    tree.appendChild(ul)
 }
-
-const progressbar = (current, max) => {
-    const progress = document.createElement("div")
-    progress.className = "progress"
-    const bar = document.createElement("bar")
-    const perc = current / max * 100 || 0
-    progress.title = `${perc}%`
-    bar.style.width = `${perc}%`
-    bar.style.backgroundColor = progressColor(perc)
-    progress.appendChild(bar)
-    return progress
-}
-
-const progressColor = perc => {
-    const bright = (50 - Math.floor(Math.abs(perc - 50))) * 2
-    const red = Math.min(
-        255, Math.max(17, Math.floor(255 - perc * 2.4)) + bright)
-    const green = Math.min(255, Math.max(17, Math.floor(perc * 2.4)) + bright)
-    return `#${red.toString(16)}${green.toString(16)}00`
-}
-
-const emptyReadErrors = () => {
-    readErrors = []
-}
-
-const getReadErrors = () => readErrors
 
 module.exports = {
     emptyReadErrors, fillTree, getReadErrors, prettySize, processLocation

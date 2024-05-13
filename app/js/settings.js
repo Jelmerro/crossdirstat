@@ -33,13 +33,13 @@ const getUnixVolumes = () => {
                     const {accessSync, constants} = require("fs")
                     accessSync(disk, constants.R_OK)
                     disks.push(disk)
-                } catch (e) {
+                } catch {
                     // Disk could not be accessed
                 }
             }
         }
         return disks
-    } catch (e) {
+    } catch {
         return []
     }
 }

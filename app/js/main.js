@@ -8,45 +8,36 @@ let allDisks = []
 let folderCounter = 0
 let fileCounter = 0
 
-const init = () => {
-    populateDisks()
-    document.getElementById("link-me").addEventListener("click", () => {
-        shell.openExternal("https://github.com/Jelmerro")
+const writeToFile = (loc, contents, encoding = "utf8") => {
+    const {writeFile} = require("fs")
+    writeFile(loc, contents, encoding, err => {
+        if (err) {
+            ipcRenderer.invoke("show-message-box", {
+                "buttons": ["Ok"],
+                "detail": err.toString(),
+                "message": "Could not save file",
+                "title": "Error",
+                "type": "error"
+            })
+        } else {
+            ipcRenderer.invoke("show-message-box", {
+                "buttons": ["Ok"],
+                "message": "File saved successfully",
+                "title": "Success",
+                "type": "info"
+            })
+        }
     })
-    document.getElementById("link-repo").addEventListener("click", () => {
-        shell.openExternal("https://github.com/Jelmerro/crossdirstat")
-    })
-    document.getElementById("link-releases").addEventListener("click", () => {
-        shell.openExternal("https://github.com/Jelmerro/crossdirstat/releases")
-    })
-    document.getElementById("menu-start").addEventListener(
-        "click", () => TABS.switchToTab("start"))
-    document.getElementById("menu-directories").addEventListener(
-        "click", () => TABS.switchToTab("directories"))
-    document.getElementById("menu-visual").addEventListener(
-        "click", () => TABS.switchToTab("visual"))
-    document.querySelector(".close-button").addEventListener(
-        "click", () => ipcRenderer.invoke("quit-app"))
-    document.getElementById("save-image").addEventListener(
-        "click", () => VISUAL.saveImage())
-    document.getElementById("visual-toggle-button").addEventListener(
-        "click", () => SETTINGS.toggleVisualConfig())
-    document.getElementById("square-view").addEventListener(
-        "mousemove", VISUAL.setFilenameOnHover)
-    window.addEventListener("keydown", e => {
-        if (e.key === "F12") {
-            ipcRenderer.invoke("toggle-devtools")
-        } else if (e.key === "Enter") {
-            if (e.target === document.getElementById("folder-path")) {
-                const {access} = require("fs")
-                access(e.target.value, err => {
-                    if (!err) {
-                        go(e.target.value)
-                    }
-                })
-            } else if (e.target.tagName.toLowerCase() !== "button") {
-                e.target.click()
-            }
+}
+
+const updateStartButton = () => {
+    const loc = document.getElementById("folder-path").value
+    const {access} = require("fs")
+    access(loc, err => {
+        if (err) {
+            document.getElementById("start-button").disabled = "disabled"
+        } else {
+            document.getElementById("start-button").removeAttribute("disabled")
         }
     })
 }
@@ -60,33 +51,6 @@ const pickFolder = async() => {
     }
     [document.getElementById("folder-path").value] = folders
     updateStartButton()
-}
-
-const go = loc => {
-    folderCounter = 0
-    fileCounter = 0
-    const {access} = require("fs")
-    access(loc, err => {
-        if (!err) {
-            resetProgressBars()
-            TABS.switchToTab("progress")
-            updateCurrentStep("scan")
-            DIR.emptyReadErrors()
-            let ignoreList = []
-            if (loc === "/") {
-                ignoreList = SETTINGS.getIgnoreList()
-            }
-            DIR.processLocation(loc, ignoreList, files => {
-                allFiles = files
-                updateCurrentStep("tree")
-                setTimeout(() => {
-                    DIR.fillTree(allFiles)
-                    updateCurrentStep("visual")
-                    setTimeout(VISUAL.generate, 30)
-                }, 30)
-            })
-        }
-    })
 }
 
 const handleErrors = () => {
@@ -185,19 +149,81 @@ const updateCounter = type => {
         = `Scanned ${fileCounter} files and ${folderCounter} folders so far`
 }
 
-const updateStartButton = () => {
-    const loc = document.getElementById("folder-path").value
+const getAllFiles = () => allFiles
+
+const go = loc => {
+    folderCounter = 0
+    fileCounter = 0
     const {access} = require("fs")
     access(loc, err => {
-        if (err) {
-            document.getElementById("start-button").disabled = "disabled"
-        } else {
-            document.getElementById("start-button").removeAttribute("disabled")
+        if (!err) {
+            resetProgressBars()
+            TABS.switchToTab("progress")
+            updateCurrentStep("scan")
+            DIR.emptyReadErrors()
+            let ignoreList = []
+            if (loc === "/") {
+                ignoreList = SETTINGS.getIgnoreList()
+            }
+            DIR.processLocation(loc, ignoreList, files => {
+                allFiles = files
+                updateCurrentStep("tree")
+                setTimeout(() => {
+                    DIR.fillTree(allFiles)
+                    updateCurrentStep("visual")
+                    setTimeout(VISUAL.generate, 30)
+                }, 30)
+            })
         }
     })
 }
 
-const getAllFiles = () => allFiles
+const processDisk = disk => {
+    setTimeout(() => {
+        const shouldEnableIgnoreList = disk === "/"
+        let ignoreList = []
+        if (shouldEnableIgnoreList) {
+            ignoreList = SETTINGS.getIgnoreList()
+        }
+        DIR.processLocation(disk, ignoreList, files => {
+            allFiles.add(files)
+            if (allFiles.children.length === allDisks.length) {
+                updateCurrentStep("tree")
+                setTimeout(() => {
+                    DIR.fillTree(allFiles)
+                    updateCurrentStep("visual")
+                    setTimeout(VISUAL.generate, 30)
+                }, 30)
+            } else {
+                processDisk(allDisks[allFiles.children.length])
+            }
+        })
+    }, 0)
+}
+
+const goAllDisks = () => {
+    folderCounter = 0
+    fileCounter = 0
+    resetProgressBars()
+    TABS.switchToTab("progress")
+    updateCurrentStep("scan")
+    DIR.emptyReadErrors()
+    allFiles = {
+        "add": disk => {
+            allFiles.children.push(disk)
+            allFiles.size += disk.size
+            allFiles.subfiles += disk.subfiles
+            allFiles.subfolders += disk.subfolders + 1
+        },
+        "children": [],
+        "location": "All disks",
+        "name": "All disks",
+        "size": 0,
+        "subfiles": 0,
+        "subfolders": 0
+    }
+    processDisk(allDisks[0])
+}
 
 const populateDisks = () => {
     let disks = ["/"]
@@ -215,11 +241,11 @@ const populateDisks = () => {
                     const {accessSync, constants} = require("fs")
                     accessSync(disk, constants.R_OK)
                     disks.push(disk)
-                } catch (e) {
+                } catch {
                     // Disk could not be accessed
                 }
             }
-        } catch (e) {
+        } catch {
             disks = ["C:\\"]
         }
     } else {
@@ -250,53 +276,6 @@ const populateDisks = () => {
     document.getElementById("pick-button").addEventListener("click", pickFolder)
 }
 
-const goAllDisks = () => {
-    folderCounter = 0
-    fileCounter = 0
-    resetProgressBars()
-    TABS.switchToTab("progress")
-    updateCurrentStep("scan")
-    DIR.emptyReadErrors()
-    allFiles = {
-        "add": disk => {
-            allFiles.children.push(disk)
-            allFiles.size += disk.size
-            allFiles.subfiles += disk.subfiles
-            allFiles.subfolders += disk.subfolders + 1
-        },
-        "children": [],
-        "location": "All disks",
-        "name": "All disks",
-        "size": 0,
-        "subfiles": 0,
-        "subfolders": 0
-    }
-    processDisk(allDisks[0])
-}
-
-const processDisk = disk => {
-    setTimeout(() => {
-        const shouldEnableIgnoreList = disk === "/"
-        let ignoreList = []
-        if (shouldEnableIgnoreList) {
-            ignoreList = SETTINGS.getIgnoreList()
-        }
-        DIR.processLocation(disk, ignoreList, files => {
-            allFiles.add(files)
-            if (allFiles.children.length === allDisks.length) {
-                updateCurrentStep("tree")
-                setTimeout(() => {
-                    DIR.fillTree(allFiles)
-                    updateCurrentStep("visual")
-                    setTimeout(VISUAL.generate, 30)
-                }, 30)
-            } else {
-                processDisk(allDisks[allFiles.children.length])
-            }
-        })
-    }, 0)
-}
-
 const saveTree = async() => {
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "filters": [{
@@ -311,24 +290,45 @@ const saveTree = async() => {
     writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
-const writeToFile = (loc, contents, encoding = "utf8") => {
-    const {writeFile} = require("fs")
-    writeFile(loc, contents, encoding, err => {
-        if (err) {
-            ipcRenderer.invoke("show-message-box", {
-                "buttons": ["Ok"],
-                "detail": err.toString(),
-                "message": "Could not save file",
-                "title": "Error",
-                "type": "error"
-            })
-        } else {
-            ipcRenderer.invoke("show-message-box", {
-                "buttons": ["Ok"],
-                "message": "File saved successfully",
-                "title": "Success",
-                "type": "info"
-            })
+const init = () => {
+    populateDisks()
+    document.getElementById("link-me").addEventListener("click", () => {
+        shell.openExternal("https://github.com/Jelmerro")
+    })
+    document.getElementById("link-repo").addEventListener("click", () => {
+        shell.openExternal("https://github.com/Jelmerro/crossdirstat")
+    })
+    document.getElementById("link-releases").addEventListener("click", () => {
+        shell.openExternal("https://github.com/Jelmerro/crossdirstat/releases")
+    })
+    document.getElementById("menu-start").addEventListener(
+        "click", () => TABS.switchToTab("start"))
+    document.getElementById("menu-directories").addEventListener(
+        "click", () => TABS.switchToTab("directories"))
+    document.getElementById("menu-visual").addEventListener(
+        "click", () => TABS.switchToTab("visual"))
+    document.querySelector(".close-button").addEventListener(
+        "click", () => ipcRenderer.invoke("quit-app"))
+    document.getElementById("save-image").addEventListener(
+        "click", () => VISUAL.saveImage())
+    document.getElementById("visual-toggle-button").addEventListener(
+        "click", () => SETTINGS.toggleVisualConfig())
+    document.getElementById("square-view").addEventListener(
+        "mousemove", VISUAL.setFilenameOnHover)
+    window.addEventListener("keydown", e => {
+        if (e.key === "F12") {
+            ipcRenderer.invoke("toggle-devtools")
+        } else if (e.key === "Enter") {
+            if (e.target === document.getElementById("folder-path")) {
+                const {access} = require("fs")
+                access(e.target.value, err => {
+                    if (!err) {
+                        go(e.target.value)
+                    }
+                })
+            } else if (e.target.tagName.toLowerCase() !== "button") {
+                e.target.click()
+            }
         }
     })
 }

@@ -19,7 +19,7 @@ const switchToTab = (newTab, force = false) => {
             } else {
                 document.getElementById(`menu-${tab}`).style.display = null
             }
-        } catch (e) {
+        } catch {
             // When a tab has no menu item
         }
     }
@@ -27,7 +27,7 @@ const switchToTab = (newTab, force = false) => {
     try {
         document.getElementById(`menu-${newTab}`).className
             = "menu-item selected"
-    } catch (e) {
+    } catch {
         // When a tab has no menu item
     }
 }

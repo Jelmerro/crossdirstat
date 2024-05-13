@@ -5,59 +5,10 @@ let filetypes = {}
 let callbacks = 0
 let squares = []
 
-const generate = () => {
-    filetypes = {}
-    callbacks = 0
-    document.getElementById("file-name").textContent = ""
-    const allFiles = MAIN.getAllFiles()
-    if (allFiles.size === 0) {
-        MAIN.updateCurrentStep("errors")
-        setTimeout(MAIN.handleErrors, 30)
-        squares = []
-        const canvas = document.getElementById("square-view")
-        const context = canvas.getContext("2d")
-        context.clearRect(0, 0, canvas.width, canvas.height)
-        generateStatsAndColors()
-        return
-    }
-    const processedFiles = processNode(allFiles)
-    MAIN.updateCurrentStep("squarify", 0, processedFiles.subfiles)
-    const {"default": squarify} = require("squarify")
-    setTimeout(() => {
-        squares = squarify(processedFiles.children, {
-            "x0": 0, "x1": 10000, "y0": 0, "y1": 10000
-        })
-        setTimeout(parseSquares, 30)
-    }, 30)
-}
-
-const parseSquares = () => {
-    const allColors = SETTINGS.getSelectedColors()
-    const typesBySize = getFiletypesBySize()
-    const canvas = document.getElementById("square-view")
-    const ctx = canvas.getContext("2d")
-    for (const s of squares) {
-        setTimeout(() => {
-            if (s.value > 0) {
-                let color = allColors.filetypes[typesBySize.indexOf(s.type)]
-                if (!color) {
-                    color = allColors.default
-                }
-                const gradient = ctx.createLinearGradient(
-                    s.x0, s.y0, s.x1, s.y1)
-                gradient.addColorStop(0, changeColor(color, 100))
-                gradient.addColorStop(0.5, color)
-                gradient.addColorStop(1, changeColor(color, -100))
-                ctx.fillStyle = gradient
-                ctx.fillRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0)
-            }
-            doneStroking()
-        }, 0)
-    }
-    document.querySelectorAll(`#visual button`).forEach(b => {
-        b.removeAttribute("disabled")
-    })
-    generateStatsAndColors()
+const changeHex = (hex, change) => {
+    const calculated = parseInt(hex, 16) + change
+    const newHex = Math.min(255, Math.max(0, calculated))
+    return newHex.toString(16).padStart(2, "0")
 }
 
 const changeColor = (color, change) => {
@@ -65,12 +16,6 @@ const changeColor = (color, change) => {
     const green = changeHex(color.substring(3, 5), change)
     const blue = changeHex(color.substring(5, 7), change)
     return `#${red}${green}${blue}`
-}
-
-const changeHex = (hex, change) => {
-    const calculated = parseInt(hex, 16) + change
-    const newHex = Math.min(255, Math.max(0, calculated))
-    return newHex.toString(16).padStart(2, "0")
 }
 
 const doneStroking = () => {
@@ -82,36 +27,8 @@ const doneStroking = () => {
     }
 }
 
-const generateStatsAndColors = () => {
-    const allColors = SETTINGS.getSelectedColors()
-    const colorsElement = document.getElementById("colors-config")
-    colorsElement.textContent = ""
-    let index = 0
-    for (const type of getFiletypesBySize()) {
-        let color = allColors.filetypes[index]
-        if (!color) {
-            color = allColors.default
-        }
-        const colorDiv = document.createElement("div")
-        const colorInput = document.createElement("input")
-        colorInput.value = color
-        colorInput.type = "color"
-        colorInput.setAttribute("index", index)
-        colorInput.addEventListener("change", colorChange)
-        colorDiv.appendChild(colorInput)
-        const typeEl = document.createElement("span")
-        typeEl.textContent = type
-        typeEl.className = "type"
-        colorDiv.appendChild(typeEl)
-        const countEl = document.createElement("span")
-        countEl.className = "count"
-        countEl.textContent = `${filetypes[type].count} files ${
-            DIR.prettySize(filetypes[type].size)}`
-        colorDiv.appendChild(countEl)
-        colorsElement.appendChild(colorDiv)
-        index += 1
-    }
-}
+const getFiletypesBySize = () => Object.keys(filetypes).sort(
+    (one, two) => filetypes[two].size - filetypes[one].size)
 
 const colorChange = event => {
     const index = event.srcElement.getAttribute("index")
@@ -136,9 +53,6 @@ const colorChange = event => {
     }
 }
 
-const getFiletypesBySize = () => Object.keys(filetypes).sort(
-    (one, two) => filetypes[two].size - filetypes[one].size)
-
 const setFilenameOnHover = e => {
     const canvas = document.getElementById("square-view")
     const r = canvas.getBoundingClientRect()
@@ -151,18 +65,6 @@ const setFilenameOnHover = e => {
             return
         }
     }
-}
-
-const processNode = node => {
-    node.value = node.size
-    if (!node.children) {
-        node.type = filetype(node)
-        return node
-    }
-    node.children.forEach((child, index) => {
-        node.children[index] = processNode(child)
-    })
-    return node
 }
 
 const filetype = f => {
@@ -183,27 +85,16 @@ const filetype = f => {
     return type
 }
 
-const saveImage = () => {
-    const buttons = ["SVG", "PNG"]
-    let message = "SVG: Vector with filenames as tooltip hover\n"
-    message += "PNG: 10000x10000 lossless image render (multiple seconds)\n"
-    if (!document.querySelector("#directories button").disabled) {
-        message += "JSON: List of squares, colors and filetype statistics"
-        buttons.push("JSON")
+const processNode = node => {
+    node.value = node.size
+    if (!node.children) {
+        node.type = filetype(node)
+        return node
     }
-    buttons.push("Cancel")
-    const {ipcRenderer} = require("electron")
-    ipcRenderer.invoke("show-message-box", {
-        buttons, message, "title": "Export type", "type": "question"
-    }).then(response => {
-        if (response === 0) {
-            saveSVG()
-        } else if (response === 1) {
-            savePNG()
-        } else if (response === 2 && buttons.length === 4) {
-            saveJSON()
-        }
+    node.children.forEach((child, index) => {
+        node.children[index] = processNode(child)
     })
+    return node
 }
 
 const saveSVG = async() => {
@@ -272,6 +163,115 @@ const saveJSON = async() => {
         squares
     }
     MAIN.writeToFile(filename, JSON.stringify(json, null, 4))
+}
+
+const saveImage = () => {
+    const buttons = ["SVG", "PNG"]
+    let message = "SVG: Vector with filenames as tooltip hover\n"
+    message += "PNG: 10000x10000 lossless image render (multiple seconds)\n"
+    if (!document.querySelector("#directories button").disabled) {
+        message += "JSON: List of squares, colors and filetype statistics"
+        buttons.push("JSON")
+    }
+    buttons.push("Cancel")
+    const {ipcRenderer} = require("electron")
+    ipcRenderer.invoke("show-message-box", {
+        buttons, message, "title": "Export type", "type": "question"
+    }).then(response => {
+        if (response === 0) {
+            saveSVG()
+        } else if (response === 1) {
+            savePNG()
+        } else if (response === 2 && buttons.length === 4) {
+            saveJSON()
+        }
+    })
+}
+
+const generateStatsAndColors = () => {
+    const allColors = SETTINGS.getSelectedColors()
+    const colorsElement = document.getElementById("colors-config")
+    colorsElement.textContent = ""
+    let index = 0
+    for (const type of getFiletypesBySize()) {
+        let color = allColors.filetypes[index]
+        if (!color) {
+            color = allColors.default
+        }
+        const colorDiv = document.createElement("div")
+        const colorInput = document.createElement("input")
+        colorInput.value = color
+        colorInput.type = "color"
+        colorInput.setAttribute("index", index)
+        colorInput.addEventListener("change", colorChange)
+        colorDiv.appendChild(colorInput)
+        const typeEl = document.createElement("span")
+        typeEl.textContent = type
+        typeEl.className = "type"
+        colorDiv.appendChild(typeEl)
+        const countEl = document.createElement("span")
+        countEl.className = "count"
+        countEl.textContent = `${filetypes[type].count} files ${
+            DIR.prettySize(filetypes[type].size)}`
+        colorDiv.appendChild(countEl)
+        colorsElement.appendChild(colorDiv)
+        index += 1
+    }
+}
+
+const parseSquares = () => {
+    const allColors = SETTINGS.getSelectedColors()
+    const typesBySize = getFiletypesBySize()
+    const canvas = document.getElementById("square-view")
+    const ctx = canvas.getContext("2d")
+    for (const s of squares) {
+        setTimeout(() => {
+            if (s.value > 0) {
+                let color = allColors.filetypes[typesBySize.indexOf(s.type)]
+                if (!color) {
+                    color = allColors.default
+                }
+                const gradient = ctx.createLinearGradient(
+                    s.x0, s.y0, s.x1, s.y1)
+                gradient.addColorStop(0, changeColor(color, 100))
+                gradient.addColorStop(0.5, color)
+                gradient.addColorStop(1, changeColor(color, -100))
+                ctx.fillStyle = gradient
+                ctx.fillRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0)
+            }
+            doneStroking()
+        }, 0)
+    }
+    document.querySelectorAll(`#visual button`).forEach(b => {
+        b.removeAttribute("disabled")
+    })
+    generateStatsAndColors()
+}
+
+const generate = () => {
+    filetypes = {}
+    callbacks = 0
+    document.getElementById("file-name").textContent = ""
+    const allFiles = MAIN.getAllFiles()
+    if (allFiles.size === 0) {
+        MAIN.updateCurrentStep("errors")
+        setTimeout(MAIN.handleErrors, 30)
+        squares = []
+        const canvas = document.getElementById("square-view")
+        const context = canvas.getContext("2d")
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        generateStatsAndColors()
+        return
+    }
+    const processedFiles = processNode(allFiles)
+    MAIN.updateCurrentStep("squarify", 0, processedFiles.subfiles)
+    const {"default": squarify} = require("squarify")
+    setTimeout(() => {
+        squares = squarify(processedFiles.children, {
+            "x0": 0, "x1": 10000, "y0": 0, "y1": 10000
+        })
+        setTimeout(parseSquares, 30)
+    }, 30)
 }
 
 module.exports = {generate, saveImage, setFilenameOnHover}
