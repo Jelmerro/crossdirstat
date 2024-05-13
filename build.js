@@ -1,7 +1,6 @@
-"use strict"
+import {readdir, rmSync, unlinkSync} from "fs"
+import {build} from "electron-builder"
 
-const builder = require("electron-builder")
-const {rmSync, readdir, unlinkSync} = require("fs")
 const ebuilder = {"config": {
     /**
      * Remove all locales except English US from the build.
@@ -33,4 +32,4 @@ process.argv.slice(1).forEach(a => {
     }
 })
 rmSync("dist/", {"force": true, "recursive": true})
-builder.build(ebuilder).then(e => console.info(e)).catch(e => console.error(e))
+build(ebuilder).then(e => console.info(e)).catch(e => console.error(e))

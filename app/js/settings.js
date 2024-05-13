@@ -1,4 +1,5 @@
-"use strict"
+import {accessSync, constants} from "fs"
+import {execSync} from "child_process"
 
 const colors = [
     "#f44336",
@@ -23,14 +24,12 @@ const getUnixVolumes = () => {
         return disks
     }
     try {
-        const {execSync} = require("child_process")
         const output = execSync("df -lkP 2>/dev/null | grep ^/").toString()
         const lines = output.split("\n")
         for (const line of lines) {
             const disk = line.split(" ").pop()
             if (disk.length > 0) {
                 try {
-                    const {accessSync, constants} = require("fs")
                     accessSync(disk, constants.R_OK)
                     disks.push(disk)
                 } catch {
@@ -65,6 +64,6 @@ const toggleVisualConfig = () => {
     }
 }
 
-module.exports = {
+export default {
     getIgnoreList, getSelectedColors, getUnixVolumes, toggleVisualConfig
 }

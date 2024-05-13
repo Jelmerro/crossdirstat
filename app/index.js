@@ -1,7 +1,5 @@
-"use strict"
-
-const {app, BrowserWindow, dialog, ipcMain, screen} = require("electron")
-const {join} = require("path")
+import {BrowserWindow, app, dialog, ipcMain, screen} from "electron"
+import {join} from "path"
 let mainWindow = null
 const tempDir = join(app.getPath("temp"), "Crossdirstat")
 app.setPath("appData", tempDir)
@@ -12,15 +10,16 @@ app.on("ready", () => {
     mainWindow = new BrowserWindow({
         "frame": false,
         "height": Math.floor(height / 1.33),
-        "icon": join(__dirname, "icons/1024x1024.png"),
+        "icon": join(import.meta.dirname, "icons/1024x1024.png"),
         "title": "crossdirstat",
         "webPreferences": {
-            "preload": join(__dirname, "apploader.js"), "sandbox": false
+            "preload": join(import.meta.dirname, "apploader.mjs"),
+            "sandbox": false
         },
         "width": Math.floor(width / 1.5)
     })
     mainWindow.setMinimumSize(750, 750)
-    mainWindow.loadURL(`file://${join(__dirname, "index.html")}`)
+    mainWindow.loadURL(`file://${join(import.meta.dirname, "index.html")}`)
     mainWindow.webContents.once("did-finish-load", () => {
         const version = process.env.npm_package_version || app.getVersion()
         mainWindow.webContents.executeJavaScript(

@@ -1,5 +1,3 @@
-"use strict"
-
 const tabs = ["start", "directories", "visual", "progress"]
 
 const switchToTab = (newTab, force = false) => {
@@ -32,4 +30,4 @@ const switchToTab = (newTab, force = false) => {
     }
 }
 
-module.exports = {switchToTab}
+export default {switchToTab}

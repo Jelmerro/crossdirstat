@@ -1,7 +1,7 @@
-"use strict"
 /* globals MAIN */
 
-const {basename, dirname, join, resolve} = require("path")
+import {access, lstat, readdir} from "fs"
+import {basename, dirname, join, resolve} from "path"
 
 const isDir = file => file.children
 
@@ -47,7 +47,6 @@ const processLocation = (rawLoc, ignoreList, callback) => {
             return
         }
     }
-    const {access, lstat, readdir} = require("fs")
     access(loc, e => {
         if (e) {
             readErrors.push(
@@ -244,6 +243,6 @@ const fillTree = allFiles => {
     tree.appendChild(ul)
 }
 
-module.exports = {
+export default {
     emptyReadErrors, fillTree, getReadErrors, prettySize, processLocation
 }

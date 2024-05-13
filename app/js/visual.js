@@ -1,5 +1,6 @@
-"use strict"
 /* global MAIN SETTINGS DIR */
+
+import {ipcRenderer} from "electron"
 
 let filetypes = {}
 let callbacks = 0
@@ -98,7 +99,6 @@ const processNode = node => {
 }
 
 const saveSVG = async() => {
-    const {ipcRenderer} = require("electron")
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "filters": [{
             "extensions": ["svg"], "name": "Scalable Vector Graphics file"
@@ -131,7 +131,6 @@ const saveSVG = async() => {
 }
 
 const savePNG = async() => {
-    const {ipcRenderer} = require("electron")
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "filters": [{
             "extensions": ["png"], "name": "Portable Network Graphics file"
@@ -147,7 +146,6 @@ const savePNG = async() => {
 }
 
 const saveJSON = async() => {
-    const {ipcRenderer} = require("electron")
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "filters": [{
             "extensions": ["json"], "name": "JavaScript Object Notation file"
@@ -174,7 +172,6 @@ const saveImage = () => {
         buttons.push("JSON")
     }
     buttons.push("Cancel")
-    const {ipcRenderer} = require("electron")
     ipcRenderer.invoke("show-message-box", {
         buttons, message, "title": "Export type", "type": "question"
     }).then(response => {
@@ -265,13 +262,15 @@ const generate = () => {
     }
     const processedFiles = processNode(allFiles)
     MAIN.updateCurrentStep("squarify", 0, processedFiles.subfiles)
-    const {"default": squarify} = require("squarify")
-    setTimeout(() => {
-        squares = squarify(processedFiles.children, {
-            "x0": 0, "x1": 10000, "y0": 0, "y1": 10000
-        })
-        setTimeout(parseSquares, 30)
-    }, 30)
+    import("squarify").then(s => {
+        const squarify = s?.default?.default || s?.default || s
+        setTimeout(() => {
+            squares = squarify(processedFiles.children, {
+                "x0": 0, "x1": 10000, "y0": 0, "y1": 10000
+            })
+            setTimeout(parseSquares, 30)
+        }, 30)
+    })
 }
 
-module.exports = {generate, saveImage, setFilenameOnHover}
+export default {generate, saveImage, setFilenameOnHover}

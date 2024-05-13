@@ -1,7 +1,8 @@
-"use strict"
 /* global TABS DIR VISUAL SETTINGS */
 
-const {ipcRenderer, shell} = require("electron")
+import {access, accessSync, constants, writeFile} from "fs"
+import {ipcRenderer, shell} from "electron"
+import {execSync} from "child_process"
 
 let allFiles = null
 let allDisks = []
@@ -9,7 +10,6 @@ let folderCounter = 0
 let fileCounter = 0
 
 const writeToFile = (loc, contents, encoding = "utf8") => {
-    const {writeFile} = require("fs")
     writeFile(loc, contents, encoding, err => {
         if (err) {
             ipcRenderer.invoke("show-message-box", {
@@ -32,7 +32,6 @@ const writeToFile = (loc, contents, encoding = "utf8") => {
 
 const updateStartButton = () => {
     const loc = document.getElementById("folder-path").value
-    const {access} = require("fs")
     access(loc, err => {
         if (err) {
             document.getElementById("start-button").disabled = "disabled"
@@ -154,7 +153,6 @@ const getAllFiles = () => allFiles
 const go = loc => {
     folderCounter = 0
     fileCounter = 0
-    const {access} = require("fs")
     access(loc, err => {
         if (!err) {
             resetProgressBars()
@@ -231,14 +229,12 @@ const populateDisks = () => {
     if (process.platform === "win32") {
         try {
             const wmic = "%SystemRoot%\\System32\\Wbem\\wmic.exe"
-            const {execSync} = require("child_process")
             const output = execSync(`${wmic} logicaldisk get name`).toString()
             disks = []
             const lines = output.split("\n")
             for (const d of lines.filter(l => (/[A-z]:/).test(l))) {
                 const disk = `${d.trim()}\\`
                 try {
-                    const {accessSync, constants} = require("fs")
                     accessSync(disk, constants.R_OK)
                     disks.push(disk)
                 } catch {
@@ -320,7 +316,6 @@ const init = () => {
             ipcRenderer.invoke("toggle-devtools")
         } else if (e.key === "Enter") {
             if (e.target === document.getElementById("folder-path")) {
-                const {access} = require("fs")
                 access(e.target.value, err => {
                     if (!err) {
                         go(e.target.value)
@@ -333,7 +328,7 @@ const init = () => {
     })
 }
 
-module.exports = {
+export default {
     getAllFiles,
     handleErrors,
     init,
