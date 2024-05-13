@@ -1,14 +1,13 @@
-/* globals MAIN */
-
 import {access, lstat, readdir} from "fs"
 import {basename, dirname, join, resolve} from "path"
+import {saveTree, updateCounter} from "./main.js"
 
 const isDir = file => file.children
 
 let readErrors = []
 const File = class {
     constructor(loc, size) {
-        MAIN.updateCounter("File", loc)
+        updateCounter("File", loc)
         this.location = loc
         this.size = size
         this.name = basename(this.location)
@@ -17,7 +16,7 @@ const File = class {
 }
 const Dir = class {
     constructor(loc) {
-        MAIN.updateCounter("Dir", loc)
+        updateCounter("Dir", loc)
         this.location = loc
         this.size = 0
         this.name = basename(this.location) || this.location
@@ -39,7 +38,7 @@ const Dir = class {
     }
 }
 
-const processLocation = (rawLoc, ignoreList, callback) => {
+export const processLocation = (rawLoc, ignoreList, callback) => {
     const loc = resolve(rawLoc)
     for (const p of ignoreList) {
         if (loc.startsWith(p)) {
@@ -112,13 +111,13 @@ const progressbar = (current, max) => {
     return progress
 }
 
-const emptyReadErrors = () => {
+export const emptyReadErrors = () => {
     readErrors = []
 }
 
-const getReadErrors = () => readErrors
+export const getReadErrors = () => readErrors
 
-const prettySize = size => {
+export const prettySize = size => {
     if (size < 1024) {
         return `${size} B`
     }
@@ -206,7 +205,7 @@ const dirInTree = (f, dirSize) => {
     return el
 }
 
-const fillTree = allFiles => {
+export const fillTree = allFiles => {
     const tree = document.getElementById("directories")
     tree.innerHTML = ""
     const head = document.createElement("div")
@@ -225,7 +224,7 @@ const fillTree = allFiles => {
     const exportBtn = document.createElement("button")
     exportBtn.className = "btn"
     exportBtn.textContent = "Save tree"
-    exportBtn.addEventListener("click", () => MAIN.saveTree())
+    exportBtn.addEventListener("click", () => saveTree())
     head.appendChild(exportBtn)
     tree.appendChild(head)
     const rootLocation = document.createElement("span")
@@ -241,8 +240,4 @@ const fillTree = allFiles => {
         }
     }
     tree.appendChild(ul)
-}
-
-export default {
-    emptyReadErrors, fillTree, getReadErrors, prettySize, processLocation
 }

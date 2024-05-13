@@ -1,6 +1,6 @@
 const tabs = ["start", "directories", "visual", "progress"]
 
-const switchToTab = (newTab, force = false) => {
+export const switchToTab = (newTab, force = false) => {
     const tabDoesNotExist = tabs.indexOf(newTab) === -1
     const currentTab = tabs.find(tab => document.getElementById(
         tab).style.display !== "none")
@@ -29,5 +29,3 @@ const switchToTab = (newTab, force = false) => {
         // When a tab has no menu item
     }
 }
-
-export default {switchToTab}

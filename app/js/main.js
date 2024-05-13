@@ -1,15 +1,19 @@
-/* global TABS DIR VISUAL SETTINGS */
-
 import {access, accessSync, constants, writeFile} from "fs"
+import {
+    emptyReadErrors, fillTree, getReadErrors, processLocation
+} from "./treeviewer.js"
+import {generate, saveImage, setFilenameOnHover} from "./visual.js"
+import {getIgnoreList, getUnixVolumes, toggleVisualConfig} from "./settings.js"
 import {ipcRenderer, shell} from "electron"
 import {execSync} from "child_process"
+import {switchToTab} from "./tabs.js"
 
 let allFiles = null
 let allDisks = []
 let folderCounter = 0
 let fileCounter = 0
 
-const writeToFile = (loc, contents, encoding = "utf8") => {
+export const writeToFile = (loc, contents, encoding = "utf8") => {
     writeFile(loc, contents, encoding, err => {
         if (err) {
             ipcRenderer.invoke("show-message-box", {
@@ -52,13 +56,13 @@ const pickFolder = async() => {
     updateStartButton()
 }
 
-const handleErrors = () => {
-    const readErrors = DIR.getReadErrors()
+export const handleErrors = () => {
+    const readErrors = getReadErrors()
     if (readErrors.length === 0) {
         document.getElementById("read-errors").textContent
             = "There were no read errors"
         document.getElementById("read-errors").style.color = "#5c0"
-        TABS.switchToTab("start", true)
+        switchToTab("start", true)
         return
     }
     document.getElementById("read-errors").textContent = ""
@@ -85,7 +89,7 @@ const handleErrors = () => {
             document.createElement("br"))
     })
     document.getElementById("read-errors").style.color = "#f50"
-    TABS.switchToTab("start", true)
+    switchToTab("start", true)
 }
 
 const resetProgressBars = () => {
@@ -102,7 +106,7 @@ const resetProgressBars = () => {
     }
 }
 
-const updateCurrentStep = (step, current, total) => {
+export const updateCurrentStep = (step, current, total) => {
     const text = document.getElementById("progress-text")
     const scan = document.getElementById("progress-scan")
     const tree = document.getElementById("progress-tree")
@@ -137,7 +141,7 @@ const updateCurrentStep = (step, current, total) => {
     }
 }
 
-const updateCounter = type => {
+export const updateCounter = type => {
     const text = document.getElementById("progress-text")
     if (type === "Dir") {
         folderCounter += 1
@@ -148,7 +152,7 @@ const updateCounter = type => {
         = `Scanned ${fileCounter} files and ${folderCounter} folders so far`
 }
 
-const getAllFiles = () => allFiles
+export const getAllFiles = () => allFiles
 
 const go = loc => {
     folderCounter = 0
@@ -156,20 +160,20 @@ const go = loc => {
     access(loc, err => {
         if (!err) {
             resetProgressBars()
-            TABS.switchToTab("progress")
+            switchToTab("progress")
             updateCurrentStep("scan")
-            DIR.emptyReadErrors()
+            emptyReadErrors()
             let ignoreList = []
             if (loc === "/") {
-                ignoreList = SETTINGS.getIgnoreList()
+                ignoreList = getIgnoreList()
             }
-            DIR.processLocation(loc, ignoreList, files => {
+            processLocation(loc, ignoreList, files => {
                 allFiles = files
                 updateCurrentStep("tree")
                 setTimeout(() => {
-                    DIR.fillTree(allFiles)
+                    fillTree(allFiles)
                     updateCurrentStep("visual")
-                    setTimeout(VISUAL.generate, 30)
+                    setTimeout(generate, 30)
                 }, 30)
             })
         }
@@ -181,16 +185,16 @@ const processDisk = disk => {
         const shouldEnableIgnoreList = disk === "/"
         let ignoreList = []
         if (shouldEnableIgnoreList) {
-            ignoreList = SETTINGS.getIgnoreList()
+            ignoreList = getIgnoreList()
         }
-        DIR.processLocation(disk, ignoreList, files => {
+        processLocation(disk, ignoreList, files => {
             allFiles.add(files)
             if (allFiles.children.length === allDisks.length) {
                 updateCurrentStep("tree")
                 setTimeout(() => {
-                    DIR.fillTree(allFiles)
+                    fillTree(allFiles)
                     updateCurrentStep("visual")
-                    setTimeout(VISUAL.generate, 30)
+                    setTimeout(generate, 30)
                 }, 30)
             } else {
                 processDisk(allDisks[allFiles.children.length])
@@ -203,9 +207,9 @@ const goAllDisks = () => {
     folderCounter = 0
     fileCounter = 0
     resetProgressBars()
-    TABS.switchToTab("progress")
+    switchToTab("progress")
     updateCurrentStep("scan")
-    DIR.emptyReadErrors()
+    emptyReadErrors()
     allFiles = {
         "add": disk => {
             allFiles.children.push(disk)
@@ -245,7 +249,7 @@ const populateDisks = () => {
             disks = ["C:\\"]
         }
     } else {
-        disks = SETTINGS.getUnixVolumes()
+        disks = getUnixVolumes()
     }
     // Add disks as an option to the start tab
     const diskElement = document.getElementById("pre-configured-folders")
@@ -272,7 +276,7 @@ const populateDisks = () => {
     document.getElementById("pick-button").addEventListener("click", pickFolder)
 }
 
-const saveTree = async() => {
+export const saveTree = async() => {
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "filters": [{
             "extensions": ["json"], "name": "JavaScript Object Notation file"
@@ -282,11 +286,11 @@ const saveTree = async() => {
     if (!filename) {
         return
     }
-    const json = {"errors": DIR.getReadErrors(), "files": allFiles}
+    const json = {"errors": getReadErrors(), "files": allFiles}
     writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
-const init = () => {
+export const init = () => {
     populateDisks()
     document.getElementById("link-me").addEventListener("click", () => {
         shell.openExternal("https://github.com/Jelmerro")
@@ -298,19 +302,19 @@ const init = () => {
         shell.openExternal("https://github.com/Jelmerro/crossdirstat/releases")
     })
     document.getElementById("menu-start").addEventListener(
-        "click", () => TABS.switchToTab("start"))
+        "click", () => switchToTab("start"))
     document.getElementById("menu-directories").addEventListener(
-        "click", () => TABS.switchToTab("directories"))
+        "click", () => switchToTab("directories"))
     document.getElementById("menu-visual").addEventListener(
-        "click", () => TABS.switchToTab("visual"))
+        "click", () => switchToTab("visual"))
     document.querySelector(".close-button").addEventListener(
         "click", () => ipcRenderer.invoke("quit-app"))
     document.getElementById("save-image").addEventListener(
-        "click", () => VISUAL.saveImage())
+        "click", () => saveImage())
     document.getElementById("visual-toggle-button").addEventListener(
-        "click", () => SETTINGS.toggleVisualConfig())
+        "click", () => toggleVisualConfig())
     document.getElementById("square-view").addEventListener(
-        "mousemove", VISUAL.setFilenameOnHover)
+        "mousemove", setFilenameOnHover)
     window.addEventListener("keydown", e => {
         if (e.key === "F12") {
             ipcRenderer.invoke("toggle-devtools")
@@ -326,14 +330,4 @@ const init = () => {
             }
         }
     })
-}
-
-export default {
-    getAllFiles,
-    handleErrors,
-    init,
-    saveTree,
-    updateCounter,
-    updateCurrentStep,
-    writeToFile
 }

@@ -1,6 +1,9 @@
-/* global MAIN SETTINGS DIR */
-
+import {
+    getAllFiles, handleErrors, updateCurrentStep, writeToFile
+} from "./main.js"
+import {getSelectedColors} from "./settings.js"
 import {ipcRenderer} from "electron"
+import {prettySize} from "./treeviewer.js"
 
 let filetypes = {}
 let callbacks = 0
@@ -21,10 +24,10 @@ const changeColor = (color, change) => {
 
 const doneStroking = () => {
     callbacks += 1
-    MAIN.updateCurrentStep("canvas", callbacks, squares.length)
+    updateCurrentStep("canvas", callbacks, squares.length)
     if (callbacks === squares.length) {
-        MAIN.updateCurrentStep("errors")
-        setTimeout(MAIN.handleErrors, 30)
+        updateCurrentStep("errors")
+        setTimeout(handleErrors, 30)
     }
 }
 
@@ -54,7 +57,7 @@ const colorChange = event => {
     }
 }
 
-const setFilenameOnHover = e => {
+export const setFilenameOnHover = e => {
     const canvas = document.getElementById("square-view")
     const r = canvas.getBoundingClientRect()
     const x = (e.clientX - r.left) / (r.right - r.left) * canvas.width
@@ -62,7 +65,7 @@ const setFilenameOnHover = e => {
     for (const s of squares) {
         if (x > s.x0 && y > s.y0 && x < s.x1 && y < s.y1) {
             document.getElementById("file-name").textContent
-                = `${s.location} (${DIR.prettySize(s.size)})`
+                = `${s.location} (${prettySize(s.size)})`
             return
         }
     }
@@ -114,7 +117,7 @@ const saveSVG = async() => {
     body += `<!-- For more details see `
     body += `https://github.com/jelmerro/crossdirstat -->\n<svg height="1000" `
     body += `width="1000" xmlns="http://www.w3.org/2000/svg" version="1.1">\n`
-    const allColors = SETTINGS.getSelectedColors()
+    const allColors = getSelectedColors()
     const types = getFiletypesBySize()
     for (const s of squares) {
         let color = allColors.filetypes[types.indexOf(s.type)]
@@ -127,7 +130,7 @@ const saveSVG = async() => {
                 height="${(s.y1 - s.y0) / 10}"></rect></g>\n`
     }
     body += "</svg>"
-    MAIN.writeToFile(filename, body)
+    writeToFile(filename, body)
 }
 
 const savePNG = async() => {
@@ -142,7 +145,7 @@ const savePNG = async() => {
     }
     const canvas = document.getElementById("square-view")
     const imageData = canvas.toDataURL().replace(/^data:image\/png;base64,/, "")
-    MAIN.writeToFile(filename, imageData, "base64")
+    writeToFile(filename, imageData, "base64")
 }
 
 const saveJSON = async() => {
@@ -156,14 +159,14 @@ const saveJSON = async() => {
         return
     }
     const json = {
-        "colors": SETTINGS.getSelectedColors(),
+        "colors": getSelectedColors(),
         "filetypes": getFiletypesBySize(),
         squares
     }
-    MAIN.writeToFile(filename, JSON.stringify(json, null, 4))
+    writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
-const saveImage = () => {
+export const saveImage = () => {
     const buttons = ["SVG", "PNG"]
     let message = "SVG: Vector with filenames as tooltip hover\n"
     message += "PNG: 10000x10000 lossless image render (multiple seconds)\n"
@@ -186,7 +189,7 @@ const saveImage = () => {
 }
 
 const generateStatsAndColors = () => {
-    const allColors = SETTINGS.getSelectedColors()
+    const allColors = getSelectedColors()
     const colorsElement = document.getElementById("colors-config")
     colorsElement.textContent = ""
     let index = 0
@@ -209,7 +212,7 @@ const generateStatsAndColors = () => {
         const countEl = document.createElement("span")
         countEl.className = "count"
         countEl.textContent = `${filetypes[type].count} files ${
-            DIR.prettySize(filetypes[type].size)}`
+            prettySize(filetypes[type].size)}`
         colorDiv.appendChild(countEl)
         colorsElement.appendChild(colorDiv)
         index += 1
@@ -217,7 +220,7 @@ const generateStatsAndColors = () => {
 }
 
 const parseSquares = () => {
-    const allColors = SETTINGS.getSelectedColors()
+    const allColors = getSelectedColors()
     const typesBySize = getFiletypesBySize()
     const canvas = document.getElementById("square-view")
     const ctx = canvas.getContext("2d")
@@ -245,14 +248,14 @@ const parseSquares = () => {
     generateStatsAndColors()
 }
 
-const generate = () => {
+export const generate = () => {
     filetypes = {}
     callbacks = 0
     document.getElementById("file-name").textContent = ""
-    const allFiles = MAIN.getAllFiles()
+    const allFiles = getAllFiles()
     if (allFiles.size === 0) {
-        MAIN.updateCurrentStep("errors")
-        setTimeout(MAIN.handleErrors, 30)
+        updateCurrentStep("errors")
+        setTimeout(handleErrors, 30)
         squares = []
         const canvas = document.getElementById("square-view")
         const context = canvas.getContext("2d")
@@ -261,7 +264,7 @@ const generate = () => {
         return
     }
     const processedFiles = processNode(allFiles)
-    MAIN.updateCurrentStep("squarify", 0, processedFiles.subfiles)
+    updateCurrentStep("squarify", 0, processedFiles.subfiles)
     import("squarify").then(s => {
         const squarify = s?.default?.default || s?.default || s
         setTimeout(() => {
@@ -272,5 +275,3 @@ const generate = () => {
         }, 30)
     })
 }
-
-export default {generate, saveImage, setFilenameOnHover}

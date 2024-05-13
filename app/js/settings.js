@@ -17,9 +17,10 @@ const colors = [
 const defaultColor = "#777777"
 const disks = []
 
-const getSelectedColors = () => ({"default": defaultColor, "filetypes": colors})
+export const getSelectedColors = () => (
+    {"default": defaultColor, "filetypes": colors})
 
-const getUnixVolumes = () => {
+export const getUnixVolumes = () => {
     if (disks.length !== 0) {
         return disks
     }
@@ -43,7 +44,7 @@ const getUnixVolumes = () => {
     }
 }
 
-const getIgnoreList = () => {
+export const getIgnoreList = () => {
     if (process.platform === "win32") {
         return []
     }
@@ -52,7 +53,7 @@ const getIgnoreList = () => {
     return ignore.filter(d => d !== "/")
 }
 
-const toggleVisualConfig = () => {
+export const toggleVisualConfig = () => {
     const colorConfig = document.getElementById("colors-config")
     const button = document.getElementById("visual-toggle-button")
     if (colorConfig.style.display === "none") {
@@ -62,8 +63,4 @@ const toggleVisualConfig = () => {
         colorConfig.style.display = "none"
         button.textContent = "Show colors"
     }
-}
-
-export default {
-    getIgnoreList, getSelectedColors, getUnixVolumes, toggleVisualConfig
 }

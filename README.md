@@ -26,7 +26,7 @@ Download a stable installer or executable for your platform from the [github rel
 
 ### Run directly
 
-Clone/download the latest source and run `npm install` and `npm start`.
+Clone/download the latest source and run `npm ci` and `npm start`.
 
 ### Make your own build
 
