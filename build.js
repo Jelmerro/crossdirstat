@@ -1,5 +1,6 @@
 import {readdir, rmSync, unlinkSync} from "fs"
 import {build} from "electron-builder"
+import {execSync} from "child_process"
 
 const ebuilder = {"config": {
     /**
@@ -87,4 +88,47 @@ process.argv.slice(2).forEach(a => {
     }
 })
 rmSync("dist/", {"force": true, "recursive": true})
+
+/** Apply new buildroot argument to electron-builder's internal outdated fpm. */
+const fixBuildrootRpmArgumentInFpm = async() => {
+    try {
+        console.info(">> PATCH buildroot arg missing in electron-builder's fpm")
+        execSync(
+            `sed -i -e 's/args = \\["rpmbuild", "-bb"\\]/args = \\["rpmbuild", `
+            + `"-bb", "--buildroot", "#{build_path}\\/BUILD"\\]/g' ~/.cache/ele`
+            + `ctron-builder/fpm/fpm*/lib/app/lib/fpm/package/rpm.rb`)
+        console.info(">> PATCH done")
+        return
+    } catch {
+        console.warn(">> PATCH failed, running dummy build to fetch fpm")
+    }
+    try {
+        // Running dummy build that will fail due to incorrect outdated args.
+        await build({
+            "config": {
+                ...ebuilder.config,
+                "files": ebuilder.files,
+                "linux": {
+                    ...ebuilder.config.linux,
+                    "target": {"arch": ["x64"], "target": "rpm"}
+                }
+            },
+            "linux": []
+        })
+    } catch {
+        // Applying fix again when dummy build fails.
+        execSync(
+            `sed -i -e 's/args = \\["rpmbuild", "-bb"\\]/args = \\["rpmbuild", `
+            + `"-bb", "--buildroot", "#{build_path}\\/BUILD"\\]/g' ~/.cache/ele`
+            + `ctron-builder/fpm/fpm*/lib/app/lib/fpm/package/rpm.rb`)
+        console.info(">> PATCH done")
+    } finally {
+        rmSync("dist/", {"force": true, "recursive": true})
+    }
+}
+
+const rpmConf = ebuilder.config.linux?.target?.find(t => t.target === "rpm")
+if (rpmConf) {
+    await fixBuildrootRpmArgumentInFpm(ebuilder)
+}
 build(ebuilder).then(e => console.info(e)).catch(e => console.error(e))
