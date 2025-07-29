@@ -6,9 +6,11 @@
   "main": "app/index.js",
   "type": "module",
   "scripts": {
-    "start": "electron app",
     "fix": "eslint --fix app build.js",
-    "lint": "eslint app build.js",
+    "lint": "npm run eslint && npm run tsc",
+    "eslint": "eslint app build.js",
+    "tsc": "tsc",
+    "start": "electron app",
     "update": "npx -y jelmerro/nus"
   },
   "repository": "https://github.com/jelmerro/crossdirstat",
@@ -28,7 +30,8 @@
     "eslint-config": "github:Jelmerro/eslint-config"
   },
   "dependencies": {
-    "squarify": "1.1.0"
+    "squarify": "1.1.0",
+    "typescript": "5.8.3"
   },
   "engines": {
     "node": ">=20"
