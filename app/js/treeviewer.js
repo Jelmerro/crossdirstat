@@ -169,11 +169,6 @@ const dirInTree = (f, dirSize) => {
     name.style.width = "40%"
     name.textContent = f.name
     head.appendChild(name)
-    const size = document.createElement("span")
-    size.className = "truncate"
-    size.style.width = "20%"
-    size.textContent = prettySize(f.size)
-    head.appendChild(size)
     const subfiles = document.createElement("span")
     subfiles.className = "truncate"
     subfiles.style.width = "20%"
@@ -184,6 +179,11 @@ const dirInTree = (f, dirSize) => {
     subfolders.style.width = "20%"
     subfolders.textContent = `${f.subfolders} folders`
     head.appendChild(subfolders)
+    const size = document.createElement("span")
+    size.className = "truncate"
+    size.style.width = "20%"
+    size.textContent = prettySize(f.size)
+    head.appendChild(size)
     // BODY
     const body = document.createElement("div")
     body.style.display = "none"
