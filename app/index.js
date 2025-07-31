@@ -1,5 +1,5 @@
-import {BrowserWindow, app, dialog, ipcMain, screen} from "electron"
-import {join} from "path"
+import {app, BrowserWindow, dialog, ipcMain, screen} from "electron"
+import {join} from "node:path"
 
 /** @type {Electron.BrowserWindow|null} */
 let mainWindow = null
@@ -8,7 +8,7 @@ app.setPath("appData", tempDir)
 app.setPath("userData", tempDir)
 app.setPath("sessionData", tempDir)
 app.on("ready", () => {
-    const {width, height} = screen.getPrimaryDisplay().workAreaSize
+    const {height, width} = screen.getPrimaryDisplay().workAreaSize
     mainWindow = new BrowserWindow({
         "frame": false,
         "height": Math.floor(height / 1.33),

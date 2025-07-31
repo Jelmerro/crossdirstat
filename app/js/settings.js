@@ -1,5 +1,5 @@
-import {accessSync, constants} from "fs"
-import {execSync} from "child_process"
+import {execSync} from "node:child_process"
+import {accessSync, constants} from "node:fs"
 
 const colors = [
     "#f44336",
@@ -15,11 +15,14 @@ const colors = [
     "#ff9800"
 ]
 const defaultColor = "#777777"
+/** @type {string[]} */
 const disks = []
 
+/** Get the currently selected colors for the filetype squares. */
 export const getSelectedColors = () => (
     {"default": defaultColor, "filetypes": colors})
 
+/** Get a list of all volumes for unix-like systems. */
 export const getUnixVolumes = () => {
     if (disks.length !== 0) {
         return disks
@@ -29,7 +32,7 @@ export const getUnixVolumes = () => {
         const lines = output.split("\n")
         for (const line of lines) {
             const disk = line.split(" ").pop()
-            if (disk.length > 0) {
+            if (disk) {
                 try {
                     accessSync(disk, constants.R_OK)
                     disks.push(disk)
@@ -44,6 +47,7 @@ export const getUnixVolumes = () => {
     }
 }
 
+/** Get a list of ignored folders, by default just /proc and other drives. */
 export const getIgnoreList = () => {
     if (process.platform === "win32") {
         return []
@@ -53,9 +57,13 @@ export const getIgnoreList = () => {
     return ignore.filter(d => d !== "/")
 }
 
+/** Toggle the display of the color config in the visual tab. */
 export const toggleVisualConfig = () => {
     const colorConfig = document.getElementById("colors-config")
     const button = document.getElementById("visual-toggle-button")
+    if (!colorConfig || !button) {
+        return
+    }
     if (colorConfig.style.display === "none") {
         colorConfig.style.display = ""
         button.textContent = "Hide colors"

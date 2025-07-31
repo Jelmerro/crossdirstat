@@ -1,8 +1,8 @@
+import {ipcRenderer} from "electron"
 import {
     getAllFiles, handleErrors, updateCurrentStep, writeToFile
 } from "./main.js"
 import {getSelectedColors} from "./settings.js"
-import {ipcRenderer} from "electron"
 import {prettySize} from "./treeviewer.js"
 
 let filetypes = {}

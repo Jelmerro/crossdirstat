@@ -1,6 +1,6 @@
-import {readdir, rmSync, unlinkSync} from "fs"
 import {build} from "electron-builder"
-import {execSync} from "child_process"
+import {execSync} from "node:child_process"
+import {readdir, rmSync, unlinkSync} from "node:fs"
 
 const ebuilder = {"config": {
     /**

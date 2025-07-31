@@ -1,12 +1,12 @@
-import {access, accessSync, constants, writeFile} from "fs"
+import {ipcRenderer, shell} from "electron"
+import {execSync} from "node:child_process"
+import {access, accessSync, constants, writeFile} from "node:fs"
+import {getIgnoreList, getUnixVolumes, toggleVisualConfig} from "./settings.js"
+import {switchToTab} from "./tabs.js"
 import {
     emptyReadErrors, fillTree, getReadErrors, processLocation
 } from "./treeviewer.js"
 import {generate, saveImage, setFilenameOnHover} from "./visual.js"
-import {getIgnoreList, getUnixVolumes, toggleVisualConfig} from "./settings.js"
-import {ipcRenderer, shell} from "electron"
-import {execSync} from "child_process"
-import {switchToTab} from "./tabs.js"
 
 let allFiles = null
 let allDisks = []

@@ -1,5 +1,5 @@
-import {access, lstat, readdir} from "fs"
-import {basename, dirname, join, resolve} from "path"
+import {access, lstat, readdir} from "node:fs"
+import {basename, dirname, join, resolve} from "node:path"
 import {saveTree, updateCounter} from "./main.js"
 
 const isDir = file => file.children
