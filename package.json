@@ -30,7 +30,7 @@
     },
     "devDependencies": {
         "electron": "39.2.0",
-        "electron-builder": "26.0.12",
+        "electron-builder": "26.1.0",
         "eslint-config": "github:Jelmerro/eslint-config",
         "type-config": "github:Jelmerro/type-config"
     },
