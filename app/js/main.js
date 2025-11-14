@@ -8,11 +8,19 @@ import {
 } from "./treeviewer.js"
 import {generate, saveImage, setFilenameOnHover} from "./visual.js"
 
+/** @type {import("./treeviewer.js").DirType|null} */
 let allFiles = null
+/** @type {string[]} */
 let allDisks = []
 let folderCounter = 0
 let fileCounter = 0
 
+/**
+ * Write data to a file, show a dialog with results on completion.
+ * @param {string} loc
+ * @param {string|Buffer} contents
+ * @param {BufferEncoding} encoding
+ */
 export const writeToFile = (loc, contents, encoding = "utf8") => {
     writeFile(loc, contents, encoding, err => {
         if (err) {
@@ -34,6 +42,7 @@ export const writeToFile = (loc, contents, encoding = "utf8") => {
     })
 }
 
+/** Update start button to be enabled/disabled based on location validity. */
 const updateStartButton = () => {
     const loc = document.getElementById("folder-path").value
     access(loc, err => {
@@ -45,6 +54,7 @@ const updateStartButton = () => {
     })
 }
 
+/** Update folder path based on the directory selected in a directory picker. */
 const pickFolder = async() => {
     const folders = await ipcRenderer.invoke("show-open-dialog", {
         "properties": ["openDirectory"], "title": "Select a folder"
@@ -58,37 +68,33 @@ const pickFolder = async() => {
 
 export const handleErrors = () => {
     const readErrors = getReadErrors()
+    const readErrorsEl = document.getElementById("read-errors")
+    if (!readErrorsEl) {
+        return
+    }
     if (readErrors.length === 0) {
-        document.getElementById("read-errors").textContent
-            = "There were no read errors"
-        document.getElementById("read-errors").style.color = "#5c0"
+        readErrorsEl.textContent = "There were no read errors"
+        readErrorsEl.style.color = "#5c0"
         switchToTab("start", true)
         return
     }
-    document.getElementById("read-errors").textContent = ""
+    readErrorsEl.textContent = ""
     if (readErrors.length === 1) {
-        document.getElementById("read-errors").appendChild(
-            document.createTextNode("There was a single read error:"))
-        document.getElementById("read-errors").appendChild(
-            document.createElement("br"))
-        document.getElementById("read-errors").appendChild(
-            document.createElement("br"))
+        readErrorsEl.appendChild(document.createTextNode(
+            "There was a single read error:"))
+        readErrorsEl.appendChild(document.createElement("br"))
+        readErrorsEl.appendChild(document.createElement("br"))
     } else {
-        document.getElementById("read-errors").appendChild(
-            document.createTextNode(`There were a total of ${
-                readErrors.length} read errors:`))
-        document.getElementById("read-errors").appendChild(
-            document.createElement("br"))
-        document.getElementById("read-errors").appendChild(
-            document.createElement("br"))
+        readErrorsEl.appendChild(document.createTextNode(
+            `There were a total of ${readErrors.length} read errors:`))
+        readErrorsEl.appendChild(document.createElement("br"))
+        readErrorsEl.appendChild(document.createElement("br"))
     }
     readErrors.forEach(error => {
-        document.getElementById("read-errors").appendChild(
-            document.createTextNode(error))
-        document.getElementById("read-errors").appendChild(
-            document.createElement("br"))
+        readErrorsEl.appendChild(document.createTextNode(error))
+        readErrorsEl.appendChild(document.createElement("br"))
     })
-    document.getElementById("read-errors").style.color = "#f50"
+    readErrorsEl.style.color = "#f50"
     switchToTab("start", true)
 }
 
@@ -98,6 +104,9 @@ const resetProgressBars = () => {
     const tree = document.getElementById("progress-tree")
     const squarify = document.getElementById("progress-squarify")
     const canvas = document.getElementById("progress-canvas")
+    if (!text || !scan || !tree || !squarify || !canvas) {
+        return
+    }
     text.textContent = ""
     for (const bar of [scan, tree, squarify, canvas]) {
         bar.classList.remove("green")
@@ -112,6 +121,9 @@ export const updateCurrentStep = (step, current, total) => {
     const tree = document.getElementById("progress-tree")
     const squarify = document.getElementById("progress-squarify")
     const canvas = document.getElementById("progress-canvas")
+    if (!text || !scan || !tree || !squarify || !canvas) {
+        return
+    }
     if (step === "scan") {
         scan.classList.add("amber")
         text.textContent = "Scanning disk for files"
@@ -142,11 +154,14 @@ export const updateCurrentStep = (step, current, total) => {
 }
 
 export const updateCounter = type => {
-    const text = document.getElementById("progress-text")
     if (type === "Dir") {
         folderCounter += 1
     } else if (type === "File") {
         fileCounter += 1
+    }
+    const text = document.getElementById("progress-text")
+    if (!text) {
+        return
     }
     text.textContent
         = `Scanned ${fileCounter} files and ${folderCounter} folders so far`
@@ -163,6 +178,7 @@ const go = loc => {
             switchToTab("progress")
             updateCurrentStep("scan")
             emptyReadErrors()
+            /** @type {string[]} */
             let ignoreList = []
             if (loc === "/") {
                 ignoreList = getIgnoreList()
@@ -292,28 +308,28 @@ export const saveTree = async() => {
 
 export const init = () => {
     populateDisks()
-    document.getElementById("link-me").addEventListener("click", () => {
+    document.getElementById("link-me")?.addEventListener("click", () => {
         shell.openExternal("https://github.com/Jelmerro")
     })
-    document.getElementById("link-repo").addEventListener("click", () => {
+    document.getElementById("link-repo")?.addEventListener("click", () => {
         shell.openExternal("https://github.com/Jelmerro/crossdirstat")
     })
-    document.getElementById("link-releases").addEventListener("click", () => {
+    document.getElementById("link-releases")?.addEventListener("click", () => {
         shell.openExternal("https://github.com/Jelmerro/crossdirstat/releases")
     })
-    document.getElementById("menu-start").addEventListener(
+    document.getElementById("menu-start")?.addEventListener(
         "click", () => switchToTab("start"))
-    document.getElementById("menu-directories").addEventListener(
+    document.getElementById("menu-directories")?.addEventListener(
         "click", () => switchToTab("directories"))
-    document.getElementById("menu-visual").addEventListener(
+    document.getElementById("menu-visual")?.addEventListener(
         "click", () => switchToTab("visual"))
-    document.querySelector(".close-button").addEventListener(
+    document.querySelector(".close-button")?.addEventListener(
         "click", () => ipcRenderer.invoke("quit-app"))
-    document.getElementById("save-image").addEventListener(
+    document.getElementById("save-image")?.addEventListener(
         "click", () => saveImage())
-    document.getElementById("visual-toggle-button").addEventListener(
+    document.getElementById("visual-toggle-button")?.addEventListener(
         "click", () => toggleVisualConfig())
-    document.getElementById("square-view").addEventListener(
+    document.getElementById("square-view")?.addEventListener(
         "mousemove", setFilenameOnHover)
     window.addEventListener("keydown", e => {
         if (e.key === "F12") {

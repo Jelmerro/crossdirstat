@@ -32,18 +32,21 @@ app.on("ready", () => {
 ipcMain.handle("quit-app", () => mainWindow?.close())
 ipcMain.handle("show-open-dialog", (_, options) => {
     if (mainWindow) {
-        dialog.showOpenDialogSync(mainWindow, options)
+        return dialog.showOpenDialogSync(mainWindow, options)
     }
+    return null
 })
 ipcMain.handle("show-save-dialog", (_, options) => {
     if (mainWindow) {
-        dialog.showSaveDialogSync(mainWindow, options)
+        return dialog.showSaveDialogSync(mainWindow, options)
     }
+    return null
 })
 ipcMain.handle("show-message-box", (_, options) => {
     if (mainWindow) {
-        dialog.showMessageBoxSync(mainWindow, options)
+        return dialog.showMessageBoxSync(mainWindow, options)
     }
+    return null
 })
 ipcMain.handle("toggle-devtools",
     () => mainWindow?.webContents.toggleDevTools())

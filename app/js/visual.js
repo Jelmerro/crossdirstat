@@ -5,16 +5,27 @@ import {
 import {getSelectedColors} from "./settings.js"
 import {prettySize} from "./treeviewer.js"
 
+/** @type {{[type: string]: {size: number, count: number}}} */
 let filetypes = {}
 let callbacks = 0
 let squares = []
 
+/**
+ * Parse a partial string color as hex and modify it with <change> amount.
+ * @param {string} hex
+ * @param {number} change
+ */
 const changeHex = (hex, change) => {
     const calculated = parseInt(hex, 16) + change
     const newHex = Math.min(255, Math.max(0, calculated))
     return newHex.toString(16).padStart(2, "0")
 }
 
+/**
+ * Change a color's hex by <change> amount to increase or reduce brightness.
+ * @param {string} color
+ * @param {number} change
+ */
 const changeColor = (color, change) => {
     const red = changeHex(color.substring(1, 3), change)
     const green = changeHex(color.substring(3, 5), change)
@@ -22,6 +33,7 @@ const changeColor = (color, change) => {
     return `#${red}${green}${blue}`
 }
 
+/** Move to the next phase after stroking all the squares in the canvas. */
 const doneStroking = () => {
     callbacks += 1
     updateCurrentStep("canvas", callbacks, squares.length)
@@ -38,7 +50,13 @@ const colorChange = event => {
     const index = event.srcElement.getAttribute("index")
     const color = event.srcElement.value
     const canvas = document.getElementById("square-view")
+    if (!(canvas instanceof HTMLCanvasElement)) {
+        return
+    }
     const ctx = canvas.getContext("2d")
+    if (!ctx) {
+        return
+    }
     const type = getFiletypesBySize()[index]
     for (const s of squares) {
         if (s.type === type) {
@@ -59,19 +77,26 @@ const colorChange = event => {
 
 export const setFilenameOnHover = e => {
     const canvas = document.getElementById("square-view")
+    if (!(canvas instanceof HTMLCanvasElement)) {
+        return
+    }
+    const filenameEl = document.getElementById("file-name")
+    if (!filenameEl) {
+        return
+    }
     const r = canvas.getBoundingClientRect()
     const x = (e.clientX - r.left) / (r.right - r.left) * canvas.width
     const y = (e.clientY - r.top) / (r.bottom - r.top) * canvas.height
     for (const s of squares) {
         if (x > s.x0 && y > s.y0 && x < s.x1 && y < s.y1) {
-            document.getElementById("file-name").textContent
-                = `${s.location} (${prettySize(s.size)})`
+            filenameEl.textContent = `${s.location} (${prettySize(s.size)})`
             return
         }
     }
 }
 
 const filetype = f => {
+    /** @type {string|RegExpExecArray|null} */
     let type = (/^.+\.([^.]+)$/).exec(f.name)
     if (type) {
         [, type] = type
@@ -82,9 +107,7 @@ const filetype = f => {
         filetypes[type].size += f.size
         filetypes[type].count += 1
     } else {
-        filetypes[type] = {}
-        filetypes[type].size = f.size
-        filetypes[type].count = 1
+        filetypes[type] = {"count": 1, "size": f.size}
     }
     return type
 }
@@ -144,6 +167,9 @@ const savePNG = async() => {
         return
     }
     const canvas = document.getElementById("square-view")
+    if (!(canvas instanceof HTMLCanvasElement)) {
+        return
+    }
     const imageData = canvas.toDataURL().replace(/^data:image\/png;base64,/, "")
     writeToFile(filename, imageData, "base64")
 }
@@ -170,7 +196,7 @@ export const saveImage = () => {
     const buttons = ["SVG", "PNG"]
     let message = "SVG: Vector with filenames as tooltip hover\n"
     message += "PNG: 10000x10000 lossless image render (multiple seconds)\n"
-    if (!document.querySelector("#directories button").disabled) {
+    if (!document.querySelector("#directories button")?.disabled) {
         message += "JSON: List of squares, colors and filetype statistics"
         buttons.push("JSON")
     }
@@ -189,8 +215,11 @@ export const saveImage = () => {
 }
 
 const generateStatsAndColors = () => {
-    const allColors = getSelectedColors()
     const colorsElement = document.getElementById("colors-config")
+    if (!colorsElement) {
+        return
+    }
+    const allColors = getSelectedColors()
     colorsElement.textContent = ""
     let index = 0
     for (const type of getFiletypesBySize()) {
@@ -202,7 +231,7 @@ const generateStatsAndColors = () => {
         const colorInput = document.createElement("input")
         colorInput.value = color
         colorInput.type = "color"
-        colorInput.setAttribute("index", index)
+        colorInput.setAttribute("index", `${index}`)
         colorInput.addEventListener("change", colorChange)
         colorDiv.appendChild(colorInput)
         const typeEl = document.createElement("span")
@@ -223,7 +252,13 @@ const parseSquares = () => {
     const allColors = getSelectedColors()
     const typesBySize = getFiletypesBySize()
     const canvas = document.getElementById("square-view")
+    if (!(canvas instanceof HTMLCanvasElement)) {
+        return
+    }
     const ctx = canvas.getContext("2d")
+    if (!ctx) {
+        return
+    }
     for (const s of squares) {
         setTimeout(() => {
             if (s.value > 0) {
@@ -251,15 +286,16 @@ const parseSquares = () => {
 export const generate = () => {
     filetypes = {}
     callbacks = 0
-    document.getElementById("file-name").textContent = ""
     const allFiles = getAllFiles()
-    if (allFiles.size === 0) {
+    if (allFiles?.size === 0) {
         updateCurrentStep("errors")
         setTimeout(handleErrors, 30)
         squares = []
         const canvas = document.getElementById("square-view")
-        const context = canvas.getContext("2d")
-        context.clearRect(0, 0, canvas.width, canvas.height)
+        if (canvas instanceof HTMLCanvasElement) {
+            const context = canvas.getContext("2d")
+            context?.clearRect(0, 0, canvas.width, canvas.height)
+        }
         generateStatsAndColors()
         return
     }

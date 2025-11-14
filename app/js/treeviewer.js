@@ -2,42 +2,76 @@ import {access, lstat, readdir} from "node:fs"
 import {basename, dirname, join, resolve} from "node:path"
 import {saveTree, updateCounter} from "./main.js"
 
-const isDir = file => file.children
+/**
+ * Check if a specific location is a directory.
+ * @param {FileOrDirType} fileOrDir
+ * @returns {fileOrDir is DirType}
+ */
+// eslint-disable-next-line no-use-before-define
+const isDir = fileOrDir => fileOrDir instanceof Dir
 
+/** @type {string[]} */
 let readErrors = []
-const File = class {
+
+/** File object that stores all relevant file info. */
+export const File = class {
+    /**
+     * Construct a new file based on location and size.
+     * @param {string} loc
+     * @param {number} size
+     */
     constructor(loc, size) {
-        updateCounter("File", loc)
+        updateCounter("File")
         this.location = loc
         this.size = size
         this.name = basename(this.location)
         this.dir = dirname(this.location)
     }
 }
-const Dir = class {
+/** @typedef {import("./treeviewer.js").File} FileType */
+
+/** Dir object that stores all relevant directory info. */
+export const Dir = class {
+    /**
+     * Construct a new directory for a location.
+     * @param {string} loc
+     */
     constructor(loc) {
-        updateCounter("Dir", loc)
+        updateCounter("Dir")
         this.location = loc
         this.size = 0
         this.name = basename(this.location) || this.location
         this.dir = dirname(this.location)
+        /** @type {FileOrDirType[]} */
         this.children = []
         this.subfiles = 0
         this.subfolders = 0
     }
 
-    add(file) {
-        this.children.push(file)
-        this.size += file.size
-        if (isDir(file)) {
-            this.subfiles += file.subfiles
-            this.subfolders += file.subfolders + 1
+    /**
+     * Add a subdirectory or a file inside the directory to this directory.
+     * @param {FileOrDirType} fileOrDir
+     */
+    add(fileOrDir) {
+        this.children.push(fileOrDir)
+        this.size += fileOrDir.size
+        if (isDir(fileOrDir)) {
+            this.subfiles += fileOrDir.subfiles
+            this.subfolders += fileOrDir.subfolders + 1
         } else {
             this.subfiles += 1
         }
     }
 }
+/** @typedef {import("./treeviewer.js").Dir} DirType */
+/** @typedef {DirType|FileType} FileOrDirType */
 
+/**
+ * Process an entire location and show loading state.
+ * @param {string} rawLoc
+ * @param {string[]} ignoreList
+ * @param {(file: FileOrDirType) => void} callback
+ */
 export const processLocation = (rawLoc, ignoreList, callback) => {
     const loc = resolve(rawLoc)
     for (const p of ignoreList) {
@@ -91,6 +125,10 @@ export const processLocation = (rawLoc, ignoreList, callback) => {
     })
 }
 
+/**
+ * Convert a percentage to a color from red to green without brown as center.
+ * @param {number} perc
+ */
 const progressColor = perc => {
     const bright = (50 - Math.floor(Math.abs(perc - 50))) * 2
     const red = Math.min(
@@ -99,6 +137,11 @@ const progressColor = perc => {
     return `#${red.toString(16)}${green.toString(16)}00`
 }
 
+/**
+ * Generate a progressbar element based on current and maximum values.
+ * @param {number} current
+ * @param {number} max
+ */
 const progressbar = (current, max) => {
     const progress = document.createElement("div")
     progress.className = "progress"
@@ -111,20 +154,29 @@ const progressbar = (current, max) => {
     return progress
 }
 
+/** Clear all existing read errors. */
 export const emptyReadErrors = () => {
     readErrors = []
 }
 
+/** Get a list of all read errors. */
 export const getReadErrors = () => readErrors
 
+/**
+ * Format any number of bytes to a value with a nice unit.
+ * @param {number} size
+ */
 export const prettySize = size => {
-    if (size < 1024) {
-        return `${size} B`
-    }
-    const exp = Math.floor(Math.log(size) / Math.log(1024))
-    return `${(size / 1024 ** exp).toFixed(2)} ${"KMGTPE"[exp - 1]}B`
+    const exp = Math.min(Math.floor(Math.log(size) / Math.log(1024)), 10)
+    const unit = (size / 1024 ** exp || 0).toFixed(2).replace(/\.?0+$/g, "")
+    return `${unit} ${" KMGTPEZYRQ"[exp]?.trim() ?? ""}B`
 }
 
+/**
+ * Add a file to the DOM tree.
+ * @param {FileType} f
+ * @param {number} dirSize
+ */
 const fileInTree = (f, dirSize) => {
     const li = document.createElement("li")
     li.className = "file"
@@ -142,6 +194,11 @@ const fileInTree = (f, dirSize) => {
     return li
 }
 
+/**
+ * Compare the size of two files or directories.
+ * @param {FileOrDirType} a
+ * @param {FileOrDirType} b
+ */
 const compareSizes = (a, b) => {
     if (a.size < b.size) {
         return -1
@@ -149,16 +206,22 @@ const compareSizes = (a, b) => {
     return 1
 }
 
+/**
+ * Add a dir to the DOM tree.
+ * @param {DirType} f
+ * @param {number} dirSize
+ */
 const dirInTree = (f, dirSize) => {
     const el = document.createElement("li")
     el.className = "dir"
     // HEAD
     const head = document.createElement("div")
+    const dropdown = document.createElement("div")
     head.addEventListener("click", () => {
-        if (head.nextSibling.style.display === "none") {
-            head.nextSibling.style.display = "inline"
+        if (dropdown.style.display === "none") {
+            dropdown.style.display = "inline"
         } else {
-            head.nextSibling.style.display = "none"
+            dropdown.style.display = "none"
         }
     })
     head.className = "collapsible-header"
@@ -185,9 +248,8 @@ const dirInTree = (f, dirSize) => {
     size.textContent = prettySize(f.size)
     head.appendChild(size)
     // BODY
-    const body = document.createElement("div")
-    body.style.display = "none"
-    body.className = "collapsible-body"
+    dropdown.style.display = "none"
+    dropdown.className = "collapsible-body"
     if (f.children.length > 0) {
         const ul = document.createElement("ul")
         for (const sub of f.children.sort(compareSizes).reverse()) {
@@ -197,26 +259,33 @@ const dirInTree = (f, dirSize) => {
                 ul.appendChild(fileInTree(sub, f.size))
             }
         }
-        body.appendChild(ul)
+        dropdown.appendChild(ul)
     } else {
-        body.textContent = "This directory is completely empty"
+        dropdown.textContent = "This directory is completely empty"
     }
-    el.appendChild(body)
+    el.appendChild(dropdown)
     return el
 }
 
-export const fillTree = allFiles => {
+/**
+ * Fill the DOM tree with all files found recursively.
+ * @param {DirType} baseDir
+ */
+export const fillTree = baseDir => {
     const tree = document.getElementById("directories")
+    if (!tree) {
+        return
+    }
     tree.innerHTML = ""
     const head = document.createElement("div")
     head.style.display = "flex"
     const title = document.createElement("span")
     title.className = "truncate"
     title.id = "directory-title"
-    title.textContent = `${allFiles.name} - ${prettySize(allFiles.size)}
-    containing ${allFiles.subfiles} files and ${allFiles.subfolders} folders`
+    title.textContent = `${baseDir.name} - ${prettySize(baseDir.size)}
+    containing ${baseDir.subfiles} files and ${baseDir.subfolders} folders`
     head.appendChild(title)
-    if (allFiles.children.length === 0) {
+    if (baseDir.children.length === 0) {
         tree.appendChild(document.createTextNode(
             "This directory is completely empty"))
         return
@@ -229,14 +298,14 @@ export const fillTree = allFiles => {
     tree.appendChild(head)
     const rootLocation = document.createElement("span")
     rootLocation.className = "truncate"
-    rootLocation.textContent = allFiles.location
+    rootLocation.textContent = baseDir.location
     tree.appendChild(rootLocation)
     const ul = document.createElement("ul")
-    for (const f of allFiles.children.sort(compareSizes).reverse()) {
+    for (const f of baseDir.children.sort(compareSizes).reverse()) {
         if (isDir(f)) {
-            ul.appendChild(dirInTree(f, allFiles.size))
+            ul.appendChild(dirInTree(f, baseDir.size))
         } else {
-            ul.appendChild(fileInTree(f, allFiles.size))
+            ul.appendChild(fileInTree(f, baseDir.size))
         }
     }
     tree.appendChild(ul)
