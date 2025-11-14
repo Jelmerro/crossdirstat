@@ -6,7 +6,7 @@ import {switchToTab} from "./tabs.js"
 import {
     emptyReadErrors, fillTree, getReadErrors, isDir, processLocation
 } from "./treeviewer.js"
-import {generate, saveImage, setFilenameOnHover} from "./visual.js"
+import {generate, saveImage} from "./visual.js"
 
 /** @type {import("./treeviewer.js").DirType|null} */
 let allFiles = null
@@ -393,8 +393,6 @@ export const init = () => {
         "click", () => saveImage())
     document.getElementById("visual-toggle-button")?.addEventListener(
         "click", () => toggleVisualConfig())
-    document.getElementById("square-view")?.addEventListener(
-        "mousemove", setFilenameOnHover)
     window.addEventListener("keydown", e => {
         if (e.key === "F12") {
             ipcRenderer.invoke("toggle-devtools")

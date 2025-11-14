@@ -56,16 +56,6 @@ const changeColor = (color, change) => {
     return `#${red}${green}${blue}`
 }
 
-/** Move to the next phase after stroking all the squares in the canvas. */
-const doneStroking = () => {
-    callbacks += 1
-    updateCurrentStep("canvas", callbacks, squares.length)
-    if (callbacks === squares.length) {
-        updateCurrentStep("errors")
-        setTimeout(handleErrors, 30)
-    }
-}
-
 /** Get all filetypes sorted by the total size of that type. */
 const getFiletypesBySize = () => Object.keys(filetypes).sort(
     (one, two) => filetypes[two].size - filetypes[one].size)
@@ -93,15 +83,17 @@ const colorChange = event => {
     for (const s of squares) {
         if (s.type === type) {
             setTimeout(() => {
-                if (s.value > 0) {
-                    const gradient = ctx.createLinearGradient(
-                        s.x0, s.y0, s.x1, s.y1)
-                    gradient.addColorStop(0, changeColor(color, 100))
-                    gradient.addColorStop(0.5, color)
-                    gradient.addColorStop(1, changeColor(color, -100))
-                    ctx.fillStyle = gradient
-                    ctx.fillRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0)
-                }
+                requestAnimationFrame(() => {
+                    if (s.value > 0) {
+                        const gradient = ctx.createLinearGradient(
+                            s.x0, s.y0, s.x1, s.y1)
+                        gradient.addColorStop(0, changeColor(color, 100))
+                        gradient.addColorStop(0.5, color)
+                        gradient.addColorStop(1, changeColor(color, -100))
+                        ctx.fillStyle = gradient
+                        ctx.fillRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0)
+                    }
+                })
             }, 0)
         }
     }
@@ -128,6 +120,66 @@ export const setFilenameOnHover = e => {
             filenameEl.textContent = `${s.location} (${prettySize(s.size)})`
             return
         }
+    }
+}
+
+/** Generate statistics and add the colorpickers based on filetype. */
+const generateStatsAndColors = () => {
+    const colorsElement = document.getElementById("colors-config")
+    if (!colorsElement) {
+        return
+    }
+    const allColors = getSelectedColors()
+    colorsElement.textContent = ""
+    let index = 0
+    for (const type of getFiletypesBySize()) {
+        let color = allColors.filetypes[index]
+        if (!color) {
+            color = allColors.default
+        }
+        const colorDiv = document.createElement("div")
+        const colorInput = document.createElement("input")
+        colorInput.value = color
+        colorInput.type = "color"
+        colorInput.setAttribute("index", `${index}`)
+        colorInput.addEventListener("change", colorChange)
+        colorDiv.append(colorInput)
+        const typeEl = document.createElement("span")
+        typeEl.textContent = type
+        typeEl.className = "type"
+        colorDiv.append(typeEl)
+        const countEl = document.createElement("span")
+        countEl.className = "count"
+        countEl.textContent = `${filetypes[type].count} files ${
+            prettySize(filetypes[type].size)}`
+        colorDiv.append(countEl)
+        colorsElement.append(colorDiv)
+        index += 1
+    }
+}
+
+/**
+ * Move to the next phase after stroking all the squares in the canvas.
+ * @param {OffscreenCanvas} offscreenCanvas
+ */
+const doneStroking = offscreenCanvas => {
+    callbacks += 1
+    updateCurrentStep("canvas", callbacks, squares.length)
+    if (callbacks === squares.length) {
+        const canvas = document.createElement("canvas")
+        canvas.height = 10000
+        canvas.width = 10000
+        canvas.id = "square-view"
+        canvas.addEventListener("mousemove", setFilenameOnHover)
+        document.getElementById("square-view")?.replaceWith(canvas)
+        canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height)
+        canvas.getContext("2d")?.drawImage(offscreenCanvas, 0, 0)
+        document.querySelectorAll(`#visual button`).forEach(b => {
+            b.removeAttribute("disabled")
+        })
+        generateStatsAndColors()
+        updateCurrentStep("errors")
+        setTimeout(handleErrors, 30)
     }
 }
 
@@ -282,75 +334,39 @@ export const saveImage = () => {
     })
 }
 
-/** Generate statistics and add the colorpickers based on filetype. */
-const generateStatsAndColors = () => {
-    const colorsElement = document.getElementById("colors-config")
-    if (!colorsElement) {
-        return
-    }
-    const allColors = getSelectedColors()
-    colorsElement.textContent = ""
-    let index = 0
-    for (const type of getFiletypesBySize()) {
-        let color = allColors.filetypes[index]
-        if (!color) {
-            color = allColors.default
-        }
-        const colorDiv = document.createElement("div")
-        const colorInput = document.createElement("input")
-        colorInput.value = color
-        colorInput.type = "color"
-        colorInput.setAttribute("index", `${index}`)
-        colorInput.addEventListener("change", colorChange)
-        colorDiv.append(colorInput)
-        const typeEl = document.createElement("span")
-        typeEl.textContent = type
-        typeEl.className = "type"
-        colorDiv.append(typeEl)
-        const countEl = document.createElement("span")
-        countEl.className = "count"
-        countEl.textContent = `${filetypes[type].count} files ${
-            prettySize(filetypes[type].size)}`
-        colorDiv.append(countEl)
-        colorsElement.append(colorDiv)
-        index += 1
-    }
-}
-
 /** Loop over all the resulting squares and draw them to the canvas. */
 const parseSquares = () => {
     const allColors = getSelectedColors()
     const typesBySize = getFiletypesBySize()
-    const canvas = document.getElementById("square-view")
-    if (!(canvas instanceof HTMLCanvasElement)) {
-        return
+    const offscreenCanvas = new OffscreenCanvas(10000, 10000)
+    const filenameEl = document.getElementById("file-name")
+    if (filenameEl) {
+        filenameEl.textContent = ""
     }
-    const ctx = canvas.getContext("2d")
+    const ctx = offscreenCanvas.getContext("2d")
     if (!ctx) {
         return
     }
     for (const s of squares) {
         setTimeout(() => {
-            if (s.value > 0) {
-                let color = allColors.filetypes[typesBySize.indexOf(s.type)]
-                if (!color) {
-                    color = allColors.default
+            requestAnimationFrame(() => {
+                if (s.value > 0) {
+                    let color = allColors.filetypes[typesBySize.indexOf(s.type)]
+                    if (!color) {
+                        color = allColors.default
+                    }
+                    const gradient = ctx.createLinearGradient(
+                        s.x0, s.y0, s.x1, s.y1)
+                    gradient.addColorStop(0, changeColor(color, 100))
+                    gradient.addColorStop(0.5, color)
+                    gradient.addColorStop(1, changeColor(color, -100))
+                    ctx.fillStyle = gradient
+                    ctx.fillRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0)
                 }
-                const gradient = ctx.createLinearGradient(
-                    s.x0, s.y0, s.x1, s.y1)
-                gradient.addColorStop(0, changeColor(color, 100))
-                gradient.addColorStop(0.5, color)
-                gradient.addColorStop(1, changeColor(color, -100))
-                ctx.fillStyle = gradient
-                ctx.fillRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0)
-            }
-            doneStroking()
+                doneStroking(offscreenCanvas)
+            })
         }, 0)
     }
-    document.querySelectorAll(`#visual button`).forEach(b => {
-        b.removeAttribute("disabled")
-    })
-    generateStatsAndColors()
 }
 
 /** Generate a big square with subsquares based on all files from treeviewer. */
