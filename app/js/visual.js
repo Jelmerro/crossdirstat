@@ -5,13 +5,15 @@ import {
 import {getSelectedColors} from "./settings.js"
 import {prettySize} from "./treeviewer.js"
 
-/** @typedef {Omit<Square, "x0"|"x1"|"y0"|"y1"
+/**
+ * @typedef {Omit<Square, "x0"|"x1"|"y0"|"y1"
  *   |"children"|"subfiles"|"subfolders">} FileNode
  */
 
 /** @typedef {Omit<Square, "x0"|"x1"|"y0"|"y1">} DirNode */
 
-/** @typedef {{
+/**
+ * @typedef {{
  *   x0: number,
  *   y0: number,
  *   x1: number,
@@ -25,8 +27,10 @@ import {prettySize} from "./treeviewer.js"
 /** @type {{[type: string]: {size: number, count: number}}} */
 let filetypes = {}
 let callbacks = 0
-/** @type {(Omit<Square, "children"|"subfiles"|"subfolders">&{
- *   children?: (FileNode|DirNode)[]})[]} */
+/**
+ * @type {(Omit<Square, "children"|"subfiles"|"subfolders">&{
+ *   children?: (FileNode|DirNode)[]})[]}
+ */
 let squares = []
 
 /**
@@ -298,17 +302,17 @@ const generateStatsAndColors = () => {
         colorInput.type = "color"
         colorInput.setAttribute("index", `${index}`)
         colorInput.addEventListener("change", colorChange)
-        colorDiv.appendChild(colorInput)
+        colorDiv.append(colorInput)
         const typeEl = document.createElement("span")
         typeEl.textContent = type
         typeEl.className = "type"
-        colorDiv.appendChild(typeEl)
+        colorDiv.append(typeEl)
         const countEl = document.createElement("span")
         countEl.className = "count"
         countEl.textContent = `${filetypes[type].count} files ${
             prettySize(filetypes[type].size)}`
-        colorDiv.appendChild(countEl)
-        colorsElement.appendChild(colorDiv)
+        colorDiv.append(countEl)
+        colorsElement.append(colorDiv)
         index += 1
     }
 }

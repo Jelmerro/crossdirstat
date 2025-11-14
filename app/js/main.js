@@ -93,19 +93,19 @@ export const handleErrors = () => {
     }
     readErrorsEl.textContent = ""
     if (readErrors.length === 1) {
-        readErrorsEl.appendChild(document.createTextNode(
+        readErrorsEl.append(document.createTextNode(
             "There was a single read error:"))
-        readErrorsEl.appendChild(document.createElement("br"))
-        readErrorsEl.appendChild(document.createElement("br"))
+        readErrorsEl.append(document.createElement("br"))
+        readErrorsEl.append(document.createElement("br"))
     } else {
-        readErrorsEl.appendChild(document.createTextNode(
+        readErrorsEl.append(document.createTextNode(
             `There were a total of ${readErrors.length} read errors:`))
-        readErrorsEl.appendChild(document.createElement("br"))
-        readErrorsEl.appendChild(document.createElement("br"))
+        readErrorsEl.append(document.createElement("br"))
+        readErrorsEl.append(document.createElement("br"))
     }
     readErrors.forEach(error => {
-        readErrorsEl.appendChild(document.createTextNode(error))
-        readErrorsEl.appendChild(document.createElement("br"))
+        readErrorsEl.append(document.createTextNode(error))
+        readErrorsEl.append(document.createElement("br"))
     })
     readErrorsEl.style.color = "#f50"
     switchToTab("start", true)
@@ -332,14 +332,14 @@ const populateDisks = () => {
         button.textContent = disk
         button.className = "btn"
         button.addEventListener("click", () => go(disk))
-        diskElement?.appendChild(button)
+        diskElement?.append(button)
     }
     // Add the all disk option
     const allButton = document.createElement("button")
     allButton.textContent = "All disks"
     allButton.className = "btn"
     allButton.addEventListener("click", goAllDisks)
-    diskElement?.appendChild(allButton)
+    diskElement?.append(allButton)
     allDisks = disks
     // Add event listener to existing elements
     const folderPathEl = document.getElementById("folder-path")

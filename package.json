@@ -1,39 +1,40 @@
 {
-  "name": "crossdirstat",
-  "productName": "Crossdirstat",
-  "version": "2.5.0-dev",
-  "description": "Free open-source cross-platform file & directory statistics",
-  "main": "app/index.js",
-  "type": "module",
-  "scripts": {
-    "fix": "eslint --fix app build.js",
-    "lint": "npm run eslint && npm run tsc",
-    "eslint": "eslint app build.js",
-    "tsc": "tsc",
-    "start": "electron app",
-    "update": "npx -y jelmerro/nus"
-  },
-  "repository": "https://github.com/jelmerro/crossdirstat",
-  "homepage": "https://github.com/jelmerro/crossdirstat",
-  "keywords": [
-    "Electron",
-    "Directory",
-    "Statistics"
-  ],
-  "author": "Jelmer van Arnhem",
-  "email": "Jelmerro@users.noreply.github.com",
-  "funding": "https://github.com/sponsors/Jelmerro/",
-  "license": "MIT",
-  "devDependencies": {
-    "electron": "37.2.5",
-    "electron-builder": "26.0.12",
-    "eslint-config": "github:Jelmerro/eslint-config"
-  },
-  "dependencies": {
-    "squarify": "1.1.0",
-    "typescript": "5.8.3"
-  },
-  "engines": {
-    "node": ">=20"
-  }
+    "name": "crossdirstat",
+    "version": "2.5.0-dev",
+    "description": "Free open-source cross-platform file & directory statistics",
+    "keywords": [
+        "Electron",
+        "Directory",
+        "Statistics"
+    ],
+    "homepage": "https://github.com/jelmerro/crossdirstat",
+    "repository": {
+        "url": "https://github.com/jelmerro/crossdirstat",
+        "type": "git"
+    },
+    "funding": "https://github.com/sponsors/Jelmerro/",
+    "license": "MIT",
+    "author": "Jelmer van Arnhem",
+    "type": "module",
+    "main": "app/index.js",
+    "scripts": {
+        "eslint": "eslint",
+        "fix": "eslint --fix",
+        "lint": "npm run eslint && npm run tsc",
+        "start": "electron app",
+        "tsc": "tsc",
+        "update": "npx -y jelmerro/nus"
+    },
+    "dependencies": {
+        "squarify": "1.1.0"
+    },
+    "devDependencies": {
+        "electron": "39.2.0",
+        "electron-builder": "26.0.12",
+        "eslint-config": "github:Jelmerro/eslint-config",
+        "type-config": "github:Jelmerro/type-config"
+    },
+    "engines": {
+        "node": ">=20"
+    }
 }

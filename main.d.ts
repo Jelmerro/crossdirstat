@@ -6,5 +6,3 @@ declare global {
         code?: number | string | undefined
     }
 }
-
-export {}

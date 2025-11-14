@@ -150,7 +150,7 @@ const progressbar = (current, max) => {
     progress.title = `${perc}%`
     bar.style.width = `${perc}%`
     bar.style.backgroundColor = progressColor(perc)
-    progress.appendChild(bar)
+    progress.append(bar)
     return progress
 }
 
@@ -180,17 +180,17 @@ export const prettySize = size => {
 const fileInTree = (f, dirSize) => {
     const li = document.createElement("li")
     li.className = "file"
-    li.appendChild(progressbar(f.size, dirSize))
+    li.append(progressbar(f.size, dirSize))
     const name = document.createElement("span")
     name.className = "truncate"
     name.style.width = "80%"
     name.textContent = f.name
-    li.appendChild(name)
+    li.append(name)
     const size = document.createElement("span")
     size.className = "truncate"
     size.style.width = "20%"
     size.textContent = prettySize(f.size)
-    li.appendChild(size)
+    li.append(size)
     return li
 }
 
@@ -225,28 +225,28 @@ const dirInTree = (f, dirSize) => {
         }
     })
     head.className = "collapsible-header"
-    el.appendChild(head)
-    head.appendChild(progressbar(f.size, dirSize))
+    el.append(head)
+    head.append(progressbar(f.size, dirSize))
     const name = document.createElement("span")
     name.className = "truncate"
     name.style.width = "40%"
     name.textContent = f.name
-    head.appendChild(name)
+    head.append(name)
     const subfiles = document.createElement("span")
     subfiles.className = "truncate"
     subfiles.style.width = "20%"
     subfiles.textContent = `${f.subfiles} files`
-    head.appendChild(subfiles)
+    head.append(subfiles)
     const subfolders = document.createElement("span")
     subfolders.className = "truncate"
     subfolders.style.width = "20%"
     subfolders.textContent = `${f.subfolders} folders`
-    head.appendChild(subfolders)
+    head.append(subfolders)
     const size = document.createElement("span")
     size.className = "truncate"
     size.style.width = "20%"
     size.textContent = prettySize(f.size)
-    head.appendChild(size)
+    head.append(size)
     // BODY
     dropdown.style.display = "none"
     dropdown.className = "collapsible-body"
@@ -254,16 +254,16 @@ const dirInTree = (f, dirSize) => {
         const ul = document.createElement("ul")
         for (const sub of f.children.sort(compareSizes).reverse()) {
             if (isDir(sub)) {
-                ul.appendChild(dirInTree(sub, f.size))
+                ul.append(dirInTree(sub, f.size))
             } else {
-                ul.appendChild(fileInTree(sub, f.size))
+                ul.append(fileInTree(sub, f.size))
             }
         }
-        dropdown.appendChild(ul)
+        dropdown.append(ul)
     } else {
         dropdown.textContent = "This directory is completely empty"
     }
-    el.appendChild(dropdown)
+    el.append(dropdown)
     return el
 }
 
@@ -284,9 +284,9 @@ export const fillTree = baseDir => {
     title.id = "directory-title"
     title.textContent = `${baseDir.name} - ${prettySize(baseDir.size)}
     containing ${baseDir.subfiles} files and ${baseDir.subfolders} folders`
-    head.appendChild(title)
+    head.append(title)
     if (baseDir.children.length === 0) {
-        tree.appendChild(document.createTextNode(
+        tree.append(document.createTextNode(
             "This directory is completely empty"))
         return
     }
@@ -294,19 +294,19 @@ export const fillTree = baseDir => {
     exportBtn.className = "btn"
     exportBtn.textContent = "Save tree"
     exportBtn.addEventListener("click", () => saveTree())
-    head.appendChild(exportBtn)
-    tree.appendChild(head)
+    head.append(exportBtn)
+    tree.append(head)
     const rootLocation = document.createElement("span")
     rootLocation.className = "truncate"
     rootLocation.textContent = baseDir.location
-    tree.appendChild(rootLocation)
+    tree.append(rootLocation)
     const ul = document.createElement("ul")
     for (const f of baseDir.children.sort(compareSizes).reverse()) {
         if (isDir(f)) {
-            ul.appendChild(dirInTree(f, baseDir.size))
+            ul.append(dirInTree(f, baseDir.size))
         } else {
-            ul.appendChild(fileInTree(f, baseDir.size))
+            ul.append(fileInTree(f, baseDir.size))
         }
     }
-    tree.appendChild(ul)
+    tree.append(ul)
 }

@@ -1,9 +1,5 @@
 import eslintConfig from "eslint-config"
 
-export default {
-    ...eslintConfig,
-    "languageOptions": {
-        ...eslintConfig.languageOptions,
-        "sourceType": "module"
-    }
-}
+eslintConfig[0].languageOptions.sourceType = "module"
+
+export default eslintConfig
