@@ -5,9 +5,27 @@ import {
 import {getSelectedColors} from "./settings.js"
 import {prettySize} from "./treeviewer.js"
 
+/** @typedef {Omit<Square, "x0"|"x1"|"y0"|"y1"
+ *   |"children"|"subfiles"|"subfolders">} FileNode
+ */
+
+/** @typedef {Omit<Square, "x0"|"x1"|"y0"|"y1">} DirNode */
+
+/** @typedef {{
+ *   x0: number,
+ *   y0: number,
+ *   x1: number,
+ *   y1: number,
+ *   children: (FileNode|DirNode)[],
+ *   value: number,
+ *   type: string
+ * }&Omit<import("./treeviewer.js").DirType, "children"|"add"|"name">} Square
+ */
+
 /** @type {{[type: string]: {size: number, count: number}}} */
 let filetypes = {}
 let callbacks = 0
+/** @type {Square[]} */
 let squares = []
 
 /**
@@ -43,18 +61,27 @@ const doneStroking = () => {
     }
 }
 
+/** Get all filetypes sorted by the total size of that type. */
 const getFiletypesBySize = () => Object.keys(filetypes).sort(
     (one, two) => filetypes[two].size - filetypes[one].size)
 
+/**
+ * Update one of the filetype colors to a newly selected one.
+ * @param {Event} event
+ */
 const colorChange = event => {
-    const index = event.srcElement.getAttribute("index")
-    const color = event.srcElement.value
+    const colorpicker = event.currentTarget
+    if (!(colorpicker instanceof HTMLInputElement)) {
+        return
+    }
+    const index = Number(colorpicker.getAttribute("index") ?? -1)
+    const color = colorpicker.value
     const canvas = document.getElementById("square-view")
     if (!(canvas instanceof HTMLCanvasElement)) {
         return
     }
     const ctx = canvas.getContext("2d")
-    if (!ctx) {
+    if (!ctx || index < 0) {
         return
     }
     const type = getFiletypesBySize()[index]
@@ -75,6 +102,10 @@ const colorChange = event => {
     }
 }
 
+/**
+ * Update the current filename label on hover of a square.
+ * @param {MouseEvent} e
+ */
 export const setFilenameOnHover = e => {
     const canvas = document.getElementById("square-view")
     if (!(canvas instanceof HTMLCanvasElement)) {
@@ -95,6 +126,10 @@ export const setFilenameOnHover = e => {
     }
 }
 
+/**
+ * Store the filetype data for a file based on extension.
+ * @param {import("./treeviewer.js").FileType} f
+ */
 const filetype = f => {
     /** @type {string|RegExpExecArray|null} */
     let type = (/^.+\.([^.]+)$/).exec(f.name)
@@ -112,16 +147,42 @@ const filetype = f => {
     return type
 }
 
+/**
+ * Process a file or directory and prepare it for passing it to squarify.
+ * @function processNode
+ * @overload
+ * @param {import("./treeviewer.js").DirType} node
+ * @returns {DirNode}
+ */
+
+/**
+ * Process a file or directory and prepare it for passing it to squarify.
+ * @function processNode
+ * @overload
+ * @param {import("./treeviewer.js").FileType} node
+ * @returns {FileNode}
+ */
+
+/**
+ * Process a file or directory and prepare it for passing it to squarify.
+ * @param {import("./treeviewer.js").FileOrDirType} node
+ */
 const processNode = node => {
-    node.value = node.size
-    if (!node.children) {
-        node.type = filetype(node)
-        return node
+    if ("children" in node) {
+        const square = {
+            ...node,
+            "children": node.children.map(child => processNode(child)),
+            "type": "dir",
+            "value": node.size
+        }
+        return square
     }
-    node.children.forEach((child, index) => {
-        node.children[index] = processNode(child)
-    })
-    return node
+    const square = {
+        ...node,
+        "type": filetype(node),
+        "value": node.size
+    }
+    return square
 }
 
 const saveSVG = async() => {
@@ -287,7 +348,7 @@ export const generate = () => {
     filetypes = {}
     callbacks = 0
     const allFiles = getAllFiles()
-    if (allFiles?.size === 0) {
+    if (!allFiles?.size) {
         updateCurrentStep("errors")
         setTimeout(handleErrors, 30)
         squares = []

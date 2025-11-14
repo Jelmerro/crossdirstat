@@ -44,25 +44,37 @@ export const writeToFile = (loc, contents, encoding = "utf8") => {
 
 /** Update start button to be enabled/disabled based on location validity. */
 const updateStartButton = () => {
-    const loc = document.getElementById("folder-path").value
-    access(loc, err => {
+    const startButton = document.getElementById("start-button")
+    if (!(startButton instanceof HTMLButtonElement)) {
+        return
+    }
+    const folderPathEl = document.getElementById("folder-path")
+    if (!(folderPathEl instanceof HTMLInputElement)) {
+        startButton.disabled = true
+        return
+    }
+    access(folderPathEl.value, err => {
         if (err) {
-            document.getElementById("start-button").disabled = "disabled"
+            startButton.disabled = true
         } else {
-            document.getElementById("start-button").removeAttribute("disabled")
+            startButton.removeAttribute("disabled")
         }
     })
 }
 
 /** Update folder path based on the directory selected in a directory picker. */
 const pickFolder = async() => {
+    /** @type {string[]|null} */
     const folders = await ipcRenderer.invoke("show-open-dialog", {
         "properties": ["openDirectory"], "title": "Select a folder"
     })
     if (!folders || !folders.length) {
         return
     }
-    [document.getElementById("folder-path").value] = folders
+    const folderPathEl = document.getElementById("folder-path")
+    if (folderPathEl instanceof HTMLInputElement) {
+        [folderPathEl.value] = folders
+    }
     updateStartButton()
 }
 
@@ -274,22 +286,26 @@ const populateDisks = () => {
         button.textContent = disk
         button.className = "btn"
         button.addEventListener("click", () => go(disk))
-        diskElement.appendChild(button)
+        diskElement?.appendChild(button)
     }
     // Add the all disk option
     const allButton = document.createElement("button")
     allButton.textContent = "All disks"
     allButton.className = "btn"
     allButton.addEventListener("click", goAllDisks)
-    diskElement.appendChild(allButton)
+    diskElement?.appendChild(allButton)
     allDisks = disks
     // Add event listener to existing elements
-    document.getElementById("folder-path")
-        .addEventListener("input", updateStartButton)
-    document.getElementById("start-button").addEventListener("click", () => {
-        go(document.getElementById("folder-path").value)
+    const folderPathEl = document.getElementById("folder-path")
+    if (!(folderPathEl instanceof HTMLInputElement)) {
+        return
+    }
+    folderPathEl.addEventListener("input", updateStartButton)
+    document.getElementById("start-button")?.addEventListener("click", () => {
+        go(folderPathEl.value)
     })
-    document.getElementById("pick-button").addEventListener("click", pickFolder)
+    document.getElementById("pick-button")?.addEventListener(
+        "click", pickFolder)
 }
 
 export const saveTree = async() => {
@@ -335,14 +351,18 @@ export const init = () => {
         if (e.key === "F12") {
             ipcRenderer.invoke("toggle-devtools")
         } else if (e.key === "Enter") {
-            if (e.target === document.getElementById("folder-path")) {
-                access(e.target.value, err => {
+            if (e.target === document.getElementById("folder-path")
+                && e.target instanceof HTMLInputElement) {
+                const loc = e.target.value
+                access(loc, err => {
                     if (!err) {
-                        go(e.target.value)
+                        go(loc)
                     }
                 })
-            } else if (e.target.tagName.toLowerCase() !== "button") {
-                e.target.click()
+            } else if (e.target instanceof HTMLElement) {
+                if (!(e.target instanceof HTMLButtonElement)) {
+                    e.target.click()
+                }
             }
         }
     })
