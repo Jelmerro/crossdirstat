@@ -4,7 +4,7 @@ import {access, accessSync, constants, writeFile} from "node:fs"
 import {getIgnoreList, getUnixVolumes, toggleVisualConfig} from "./settings.js"
 import {switchToTab} from "./tabs.js"
 import {
-    emptyReadErrors, fillTree, getReadErrors, processLocation
+    emptyReadErrors, fillTree, getReadErrors, isDir, processLocation
 } from "./treeviewer.js"
 import {generate, saveImage, setFilenameOnHover} from "./visual.js"
 
@@ -78,6 +78,7 @@ const pickFolder = async() => {
     updateStartButton()
 }
 
+/** Load, parse and show all read errors, then switch to start tab. */
 export const handleErrors = () => {
     const readErrors = getReadErrors()
     const readErrorsEl = document.getElementById("read-errors")
@@ -110,6 +111,7 @@ export const handleErrors = () => {
     switchToTab("start", true)
 }
 
+/** Reset all the individual progress bars to zero. */
 const resetProgressBars = () => {
     const text = document.getElementById("progress-text")
     const scan = document.getElementById("progress-scan")
@@ -127,7 +129,13 @@ const resetProgressBars = () => {
     }
 }
 
-export const updateCurrentStep = (step, current, total) => {
+/**
+ * Advance or report progress for one of the directory parsing steps.
+ * @param {"scan"|"tree"|"squarify"|"canvas"|"errors"} step
+ * @param {number} current
+ * @param {number} total
+ */
+export const updateCurrentStep = (step, current = 0, total = 0) => {
     const text = document.getElementById("progress-text")
     const scan = document.getElementById("progress-scan")
     const tree = document.getElementById("progress-tree")
@@ -165,6 +173,10 @@ export const updateCurrentStep = (step, current, total) => {
     }
 }
 
+/**
+ * Update the read counter in the progress screen based on node type.
+ * @param {"File"|"Dir"} type
+ */
 export const updateCounter = type => {
     if (type === "Dir") {
         folderCounter += 1
@@ -179,8 +191,13 @@ export const updateCounter = type => {
         = `Scanned ${fileCounter} files and ${folderCounter} folders so far`
 }
 
+/** Get all files that have completed parsing. */
 export const getAllFiles = () => allFiles
 
+/**
+ * Start parsing a given directory.
+ * @param {string} loc
+ */
 const go = loc => {
     folderCounter = 0
     fileCounter = 0
@@ -196,11 +213,22 @@ const go = loc => {
                 ignoreList = getIgnoreList()
             }
             processLocation(loc, ignoreList, files => {
+                if (!isDir(files)) {
+                    const readErrorsEl = document.getElementById("read-errors")
+                    if (readErrorsEl) {
+                        readErrorsEl.textContent
+                            = "Single file scanning is not supported"
+                        readErrorsEl.style.color = "#f50"
+                    }
+                    switchToTab("start", true)
+                    return
+                }
                 allFiles = files
                 updateCurrentStep("tree")
                 setTimeout(() => {
-                    fillTree(allFiles)
-                    updateCurrentStep("visual")
+                    if (allFiles) {
+                        fillTree(allFiles)
+                    }
                     setTimeout(generate, 30)
                 }, 30)
             })
@@ -208,29 +236,36 @@ const go = loc => {
     })
 }
 
+/**
+ * Start processing an entire disk.
+ * @param {string} disk
+ */
 const processDisk = disk => {
     setTimeout(() => {
         const shouldEnableIgnoreList = disk === "/"
+        /** @type {string[]} */
         let ignoreList = []
         if (shouldEnableIgnoreList) {
             ignoreList = getIgnoreList()
         }
         processLocation(disk, ignoreList, files => {
-            allFiles.add(files)
-            if (allFiles.children.length === allDisks.length) {
+            allFiles?.add(files)
+            if (allFiles?.children.length === allDisks.length) {
                 updateCurrentStep("tree")
                 setTimeout(() => {
-                    fillTree(allFiles)
-                    updateCurrentStep("visual")
+                    if (allFiles) {
+                        fillTree(allFiles)
+                    }
                     setTimeout(generate, 30)
                 }, 30)
             } else {
-                processDisk(allDisks[allFiles.children.length])
+                processDisk(allDisks[allFiles?.children.length ?? 0])
             }
         })
     }, 0)
 }
 
+/** Scan all disks in a combined virtual "All disks" directory. */
 const goAllDisks = () => {
     folderCounter = 0
     fileCounter = 0
@@ -239,13 +274,23 @@ const goAllDisks = () => {
     updateCurrentStep("scan")
     emptyReadErrors()
     allFiles = {
+        /**
+         * Add a subdirectory or a file inside the directory to this directory.
+         * @param {import("./treeviewer.js").FileOrDirType} disk
+         */
         "add": disk => {
+            if (!allFiles) {
+                return
+            }
             allFiles.children.push(disk)
             allFiles.size += disk.size
-            allFiles.subfiles += disk.subfiles
-            allFiles.subfolders += disk.subfolders + 1
+            if (isDir(disk)) {
+                allFiles.subfiles += disk.subfiles
+                allFiles.subfolders += disk.subfolders + 1
+            }
         },
         "children": [],
+        "dir": "",
         "location": "All disks",
         "name": "All disks",
         "size": 0,
@@ -255,6 +300,7 @@ const goAllDisks = () => {
     processDisk(allDisks[0])
 }
 
+/** Generate a list of all disks on the system, either for Windows or Unix. */
 const populateDisks = () => {
     let disks = ["/"]
     // Platform specific disks
@@ -308,6 +354,7 @@ const populateDisks = () => {
         "click", pickFolder)
 }
 
+/** Save all files as a tree to JSON. */
 export const saveTree = async() => {
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "filters": [{
@@ -322,6 +369,7 @@ export const saveTree = async() => {
     writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
+/** Main event listener init and startup. */
 export const init = () => {
     populateDisks()
     document.getElementById("link-me")?.addEventListener("click", () => {

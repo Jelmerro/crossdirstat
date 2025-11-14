@@ -2,16 +2,16 @@ import {access, lstat, readdir} from "node:fs"
 import {basename, dirname, join, resolve} from "node:path"
 import {saveTree, updateCounter} from "./main.js"
 
+/** @type {string[]} */
+let readErrors = []
+
 /**
  * Check if a specific location is a directory.
  * @param {FileOrDirType} fileOrDir
  * @returns {fileOrDir is DirType}
  */
 // eslint-disable-next-line no-use-before-define
-const isDir = fileOrDir => fileOrDir instanceof Dir
-
-/** @type {string[]} */
-let readErrors = []
+export const isDir = fileOrDir => fileOrDir instanceof Dir
 
 /** File object that stores all relevant file info. */
 export const File = class {

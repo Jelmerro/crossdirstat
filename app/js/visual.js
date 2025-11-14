@@ -25,7 +25,8 @@ import {prettySize} from "./treeviewer.js"
 /** @type {{[type: string]: {size: number, count: number}}} */
 let filetypes = {}
 let callbacks = 0
-/** @type {Square[]} */
+/** @type {(Omit<Square, "children"|"subfiles"|"subfolders">&{
+ *   children?: (FileNode|DirNode)[]})[]} */
 let squares = []
 
 /**
@@ -185,6 +186,7 @@ const processNode = node => {
     return square
 }
 
+/** Save the squares to disk as an SVG. */
 const saveSVG = async() => {
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "filters": [{
@@ -217,6 +219,7 @@ const saveSVG = async() => {
     writeToFile(filename, body)
 }
 
+/** Save the squares to disk as a PNG. */
 const savePNG = async() => {
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "filters": [{
@@ -235,6 +238,7 @@ const savePNG = async() => {
     writeToFile(filename, imageData, "base64")
 }
 
+/** Save the squares to disk as JSON. */
 const saveJSON = async() => {
     const filename = await ipcRenderer.invoke("show-save-dialog", {
         "filters": [{
@@ -253,14 +257,13 @@ const saveJSON = async() => {
     writeToFile(filename, JSON.stringify(json, null, 4))
 }
 
+/** Save the current canvas as an image to disk. */
 export const saveImage = () => {
     const buttons = ["SVG", "PNG"]
     let message = "SVG: Vector with filenames as tooltip hover\n"
     message += "PNG: 10000x10000 lossless image render (multiple seconds)\n"
-    if (!document.querySelector("#directories button")?.disabled) {
-        message += "JSON: List of squares, colors and filetype statistics"
-        buttons.push("JSON")
-    }
+    message += "JSON: List of squares, colors and filetype statistics"
+    buttons.push("JSON")
     buttons.push("Cancel")
     ipcRenderer.invoke("show-message-box", {
         buttons, message, "title": "Export type", "type": "question"
@@ -275,6 +278,7 @@ export const saveImage = () => {
     })
 }
 
+/** Generate statistics and add the colorpickers based on filetype. */
 const generateStatsAndColors = () => {
     const colorsElement = document.getElementById("colors-config")
     if (!colorsElement) {
@@ -309,6 +313,7 @@ const generateStatsAndColors = () => {
     }
 }
 
+/** Loop over all the resulting squares and draw them to the canvas. */
 const parseSquares = () => {
     const allColors = getSelectedColors()
     const typesBySize = getFiletypesBySize()
@@ -344,6 +349,7 @@ const parseSquares = () => {
     generateStatsAndColors()
 }
 
+/** Generate a big square with subsquares based on all files from treeviewer. */
 export const generate = () => {
     filetypes = {}
     callbacks = 0
