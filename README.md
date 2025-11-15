@@ -49,8 +49,3 @@ All the alternatives are great programs, but none of them are a perfect fit for 
 ## License
 
 crossdirstat was made by [Jelmer van Arnhem](https://github.com/Jelmerro) and is MIT licensed, see LICENSE for details.
-
-This project makes use of the following libraries:
-
-- [Electron](https://github.com/electron/electron) (MIT @ GitHub Inc.)
-- [squarify](https://github.com/huy-nguyen/squarify) (MIT @ Huy Nguyen)

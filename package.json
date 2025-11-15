@@ -1,6 +1,6 @@
 {
     "name": "crossdirstat",
-    "version": "2.5.0-dev",
+    "version": "2.5.0",
     "description": "Free open-source cross-platform file & directory statistics",
     "keywords": [
         "Electron",
@@ -30,7 +30,7 @@
     },
     "devDependencies": {
         "electron": "39.2.0",
-        "electron-builder": "26.1.0",
+        "electron-builder": "26.2.0",
         "eslint-config": "github:Jelmerro/eslint-config",
         "type-config": "github:Jelmerro/type-config"
     },
