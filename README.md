@@ -3,7 +3,7 @@ crossdirstat
 
 ![crossdirstat](app/icons/128x128.png)
 
-Free open-source cross-platform file & directory statistics as found on [Github](https://github.com/Jelmerro/crossdirstat)
+Free open-source cross-platform file & directory statistics
 
 I have personally replaced crossdirstat with ncdu for the most part,
 so major features are not planned, but I will update the Electron version occasionally.
@@ -20,9 +20,18 @@ See below for features, installation and why I made crossdirstat all those years
 
 ## Installation
 
-### Easy download
+### [Github](https://github.com/Jelmerro/crossdirstat/releases)
 
-Download a stable installer or executable for your platform from the [github releases page](https://github.com/Jelmerro/crossdirstat/releases).
+Download a stable installer or executable for your platform from Github.
+
+### [Fedora](https://jelmerro.nl/fedora)
+
+I host a custom Fedora repository that you can use for automatic updates.
+
+```bash
+sudo dnf config-manager addrepo --from-repofile=https://jelmerro.nl/fedora/jelmerro.repo
+sudo dnf install crossdirstat
+```
 
 ### Run directly
 
