@@ -9,8 +9,9 @@ const ebuilder = {"config": {
     "afterPack": context => {
         const localeDir = `${context.appOutDir}/locales/`
         readdir(localeDir, (_err, files) => {
-            files?.filter(f => !f.match(/en-US\.pak/))
-                .forEach(f => unlinkSync(localeDir + f))
+            for (const l of files?.filter(f => !/en-US\.pak/.test(f)) ?? []) {
+                unlinkSync(localeDir + l)
+            }
         })
     },
     "appId": "com.github.Jelmerro.crossdirstat",
@@ -69,7 +70,7 @@ const ebuilder = {"config": {
         ]
     }
 }}
-process.argv.slice(2).forEach(a => {
+for (const a of process.argv.slice(2)) {
     if (a === "--help") {
         console.info("Basic crossdirstat build script, these are its options:")
         console.info(" --all, --linux, --win, --mac")
@@ -85,6 +86,6 @@ process.argv.slice(2).forEach(a => {
     if (a === "--mac" || a === "--all") {
         ebuilder.mac = []
     }
-})
+}
 rmSync("dist/", {"force": true, "recursive": true})
-build(ebuilder).then(e => console.info(e)).catch(e => console.error(e))
+console.info(await build(ebuilder))

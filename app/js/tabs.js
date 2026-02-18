@@ -8,7 +8,7 @@ const tabs = ["start", "directories", "visual", "progress"]
  * @param {boolean} force
  */
 export const switchToTab = (newTab, force = false) => {
-    const tabDoesNotExist = tabs.indexOf(newTab) === -1
+    const tabDoesNotExist = !tabs.includes(newTab)
     const currentTab = tabs.find(tab => document.getElementById(
         tab)?.style.display !== "none")
     const inProgress = currentTab === "progress"

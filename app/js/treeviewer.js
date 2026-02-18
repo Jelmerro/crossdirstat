@@ -252,7 +252,7 @@ const dirInTree = (f, dirSize) => {
     dropdown.className = "collapsible-body"
     if (f.children.length > 0) {
         const ul = document.createElement("ul")
-        for (const sub of f.children.sort(compareSizes).reverse()) {
+        for (const sub of f.children.toSorted(compareSizes).toReversed()) {
             if (isDir(sub)) {
                 ul.append(dirInTree(sub, f.size))
             } else {
@@ -301,7 +301,7 @@ export const fillTree = baseDir => {
     rootLocation.textContent = baseDir.location
     tree.append(rootLocation)
     const ul = document.createElement("ul")
-    for (const f of baseDir.children.sort(compareSizes).reverse()) {
+    for (const f of baseDir.children.toSorted(compareSizes).toReversed()) {
         if (isDir(f)) {
             ul.append(dirInTree(f, baseDir.size))
         } else {

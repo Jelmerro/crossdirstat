@@ -39,7 +39,7 @@ let squares = []
  * @param {number} change
  */
 const changeHex = (hex, change) => {
-    const calculated = parseInt(hex, 16) + change
+    const calculated = Number.parseInt(hex, 16) + change
     const newHex = Math.min(255, Math.max(0, calculated))
     return newHex.toString(16).padStart(2, "0")
 }
@@ -50,14 +50,14 @@ const changeHex = (hex, change) => {
  * @param {number} change
  */
 const changeColor = (color, change) => {
-    const red = changeHex(color.substring(1, 3), change)
-    const green = changeHex(color.substring(3, 5), change)
-    const blue = changeHex(color.substring(5, 7), change)
+    const red = changeHex(color.slice(1, 3), change)
+    const green = changeHex(color.slice(3, 5), change)
+    const blue = changeHex(color.slice(5, 7), change)
     return `#${red}${green}${blue}`
 }
 
 /** Get all filetypes sorted by the total size of that type. */
-const getFiletypesBySize = () => Object.keys(filetypes).sort(
+const getFiletypesBySize = () => Object.keys(filetypes).toSorted(
     (one, two) => filetypes[two].size - filetypes[one].size)
 
 /**
@@ -174,9 +174,9 @@ const doneStroking = offscreenCanvas => {
         document.getElementById("square-view")?.replaceWith(canvas)
         canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height)
         canvas.getContext("2d")?.drawImage(offscreenCanvas, 0, 0)
-        document.querySelectorAll(`#visual button`).forEach(b => {
+        for (const b of document.querySelectorAll(`#visual button`)) {
             b.removeAttribute("disabled")
-        })
+        }
         generateStatsAndColors()
         updateCurrentStep("errors")
         setTimeout(handleErrors, 30)
@@ -319,8 +319,7 @@ export const saveImage = () => {
     let message = "SVG: Vector with filenames as tooltip hover\n"
     message += "PNG: 10000x10000 lossless image render (multiple seconds)\n"
     message += "JSON: List of squares, colors and filetype statistics"
-    buttons.push("JSON")
-    buttons.push("Cancel")
+    buttons.push("JSON", "Cancel")
     ipcRenderer.invoke("show-message-box", {
         buttons, message, "title": "Export type", "type": "question"
     }).then(response => {

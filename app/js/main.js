@@ -68,7 +68,7 @@ const pickFolder = async() => {
     const folders = await ipcRenderer.invoke("show-open-dialog", {
         "properties": ["openDirectory"], "title": "Select a folder"
     })
-    if (!folders || !folders.length) {
+    if (!folders || folders.length === 0) {
         return
     }
     const folderPathEl = document.getElementById("folder-path")
@@ -103,10 +103,10 @@ export const handleErrors = () => {
         readErrorsEl.append(document.createElement("br"))
         readErrorsEl.append(document.createElement("br"))
     }
-    readErrors.forEach(error => {
+    for (const error of readErrors) {
         readErrorsEl.append(document.createTextNode(error))
         readErrorsEl.append(document.createElement("br"))
-    })
+    }
     readErrorsEl.style.color = "#f50"
     switchToTab("start", true)
 }
@@ -123,8 +123,7 @@ const resetProgressBars = () => {
     }
     text.textContent = ""
     for (const bar of [scan, tree, squarify, canvas]) {
-        bar.classList.remove("green")
-        bar.classList.remove("amber")
+        bar.classList.remove("green", "amber")
         bar.style.width = "100%"
     }
 }
@@ -306,7 +305,7 @@ const populateDisks = () => {
     // Platform specific disks
     if (process.platform === "win32") {
         try {
-            const wmic = "%SystemRoot%\\System32\\Wbem\\wmic.exe"
+            const wmic = String.raw`%SystemRoot%\System32\Wbem\wmic.exe`
             const output = execSync(`${wmic} logicaldisk get name`).toString()
             disks = []
             const lines = output.split("\n")
@@ -405,10 +404,9 @@ export const init = () => {
                         go(loc)
                     }
                 })
-            } else if (e.target instanceof HTMLElement) {
-                if (!(e.target instanceof HTMLButtonElement)) {
-                    e.target.click()
-                }
+            } else if (e.target instanceof HTMLElement
+            && !(e.target instanceof HTMLButtonElement)) {
+                e.target.click()
             }
         }
     })

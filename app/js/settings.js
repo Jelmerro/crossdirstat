@@ -24,7 +24,7 @@ export const getSelectedColors = () => (
 
 /** Get a list of all volumes for unix-like systems. */
 export const getUnixVolumes = () => {
-    if (disks.length !== 0) {
+    if (disks.length > 0) {
         return disks
     }
     try {
@@ -52,8 +52,7 @@ export const getIgnoreList = () => {
     if (process.platform === "win32") {
         return []
     }
-    const ignore = getUnixVolumes().slice()
-    ignore.push("/proc")
+    const ignore = [...getUnixVolumes(), "/proc"]
     return ignore.filter(d => d !== "/")
 }
 

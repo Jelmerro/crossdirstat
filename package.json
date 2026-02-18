@@ -8,6 +8,7 @@
         "Statistics"
     ],
     "homepage": "https://github.com/jelmerro/crossdirstat",
+    "bugs": "https://github.com/jelmerro/crossdirstat/issues/",
     "repository": {
         "url": "https://github.com/jelmerro/crossdirstat",
         "type": "git"
@@ -16,7 +17,8 @@
     "license": "MIT",
     "author": "Jelmer van Arnhem",
     "type": "module",
-    "main": "app/index.js",
+    "exports": "./app/index.js",
+    "main": "./app/index.js",
     "scripts": {
         "eslint": "eslint",
         "fix": "eslint --fix",
@@ -29,12 +31,12 @@
         "squarify": "1.1.0"
     },
     "devDependencies": {
-        "electron": "39.2.3",
-        "electron-builder": "26.3.0",
+        "electron": "40.4.1",
+        "electron-builder": "26.8.1",
         "eslint-config": "github:Jelmerro/eslint-config",
         "type-config": "github:Jelmerro/type-config"
     },
     "engines": {
-        "node": ">=20"
+        "node": ">=22.16"
     }
 }
