@@ -95,14 +95,12 @@ export const handleErrors = () => {
     if (readErrors.length === 1) {
         readErrorsEl.append(document.createTextNode(
             "There was a single read error:"))
-        readErrorsEl.append(document.createElement("br"))
-        readErrorsEl.append(document.createElement("br"))
     } else {
         readErrorsEl.append(document.createTextNode(
             `There were a total of ${readErrors.length} read errors:`))
-        readErrorsEl.append(document.createElement("br"))
-        readErrorsEl.append(document.createElement("br"))
     }
+    readErrorsEl.append(document.createElement("br"))
+    readErrorsEl.append(document.createElement("br"))
     for (const error of readErrors) {
         readErrorsEl.append(document.createTextNode(error))
         readErrorsEl.append(document.createElement("br"))
@@ -201,37 +199,38 @@ const go = loc => {
     folderCounter = 0
     fileCounter = 0
     access(loc, err => {
-        if (!err) {
-            resetProgressBars()
-            switchToTab("progress")
-            updateCurrentStep("scan")
-            emptyReadErrors()
-            /** @type {string[]} */
-            let ignoreList = []
-            if (loc === "/") {
-                ignoreList = getIgnoreList()
-            }
-            processLocation(loc, ignoreList, files => {
-                if (!isDir(files)) {
-                    const readErrorsEl = document.getElementById("read-errors")
-                    if (readErrorsEl) {
-                        readErrorsEl.textContent
-                            = "Single file scanning is not supported"
-                        readErrorsEl.style.color = "#f50"
-                    }
-                    switchToTab("start", true)
-                    return
-                }
-                allFiles = files
-                updateCurrentStep("tree")
-                setTimeout(() => {
-                    if (allFiles) {
-                        fillTree(allFiles)
-                    }
-                    setTimeout(generate, 30)
-                }, 30)
-            })
+        if (err) {
+            return
         }
+        resetProgressBars()
+        switchToTab("progress")
+        updateCurrentStep("scan")
+        emptyReadErrors()
+        /** @type {string[]} */
+        let ignoreList = []
+        if (loc === "/") {
+            ignoreList = getIgnoreList()
+        }
+        processLocation(loc, ignoreList, files => {
+            if (!isDir(files)) {
+                const readErrorsEl = document.getElementById("read-errors")
+                if (readErrorsEl) {
+                    readErrorsEl.textContent
+                        = "Single file scanning is not supported"
+                    readErrorsEl.style.color = "#f50"
+                }
+                switchToTab("start", true)
+                return
+            }
+            allFiles = files
+            updateCurrentStep("tree")
+            setTimeout(() => {
+                if (allFiles) {
+                    fillTree(allFiles)
+                }
+                setTimeout(generate, 30)
+            }, 30)
+        })
     })
 }
 

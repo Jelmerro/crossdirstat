@@ -276,7 +276,7 @@ export const fillTree = baseDir => {
     if (!tree) {
         return
     }
-    tree.innerHTML = ""
+    tree.textContent = ""
     const head = document.createElement("div")
     head.style.display = "flex"
     const title = document.createElement("span")

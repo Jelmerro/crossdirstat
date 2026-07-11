@@ -84,15 +84,16 @@ const colorChange = event => {
         if (s.type === type) {
             setTimeout(() => {
                 requestAnimationFrame(() => {
-                    if (s.value > 0) {
-                        const gradient = ctx.createLinearGradient(
-                            s.x0, s.y0, s.x1, s.y1)
-                        gradient.addColorStop(0, changeColor(color, 100))
-                        gradient.addColorStop(0.5, color)
-                        gradient.addColorStop(1, changeColor(color, -100))
-                        ctx.fillStyle = gradient
-                        ctx.fillRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0)
+                    if (!s.value) {
+                        return
                     }
+                    const gradient = ctx.createLinearGradient(
+                        s.x0, s.y0, s.x1, s.y1)
+                    gradient.addColorStop(0, changeColor(color, 100))
+                    gradient.addColorStop(0.5, color)
+                    gradient.addColorStop(1, changeColor(color, -100))
+                    ctx.fillStyle = gradient
+                    ctx.fillRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0)
                 })
             }, 0)
         }
