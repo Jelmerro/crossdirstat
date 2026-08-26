@@ -1,6 +1,6 @@
 {
     "name": "crossdirstat",
-    "version": "2.7.0",
+    "version": "2.8.0-dev",
     "description": "Free open-source cross-platform file & directory statistics",
     "keywords": [
         "Electron",
