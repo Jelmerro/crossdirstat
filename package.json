@@ -31,7 +31,7 @@
         "squarify": "1.1.0"
     },
     "devDependencies": {
-        "electron": "43.1.0",
+        "electron": "44.0.0",
         "electron-builder": "26.15.3",
         "eslint-config": "github:Jelmerro/eslint-config",
         "type-config": "github:Jelmerro/type-config"
